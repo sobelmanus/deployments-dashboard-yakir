@@ -10,7 +10,7 @@ def _fmt_dt(dt: datetime | None) -> str | None:
     # Ensure UTC-aware
     if dt.tzinfo is None:
         dt = dt.replace(tzinfo=timezone.utc)
-    return dt.strftime("%Y-%m-%dT%H:%M:%S.") + f"{dt.microsecond // 1000:03d}Z"
+    return dt.strftime("%Y-%m-%dT%H:%M:%S.%f") + "Z"
 
 
 def serialize_deployment(doc: dict) -> dict:
