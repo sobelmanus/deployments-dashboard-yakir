@@ -11,8 +11,16 @@
   }
 }
 
+@keyframes slide-in {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
 @layer utilities {
   .animate-pulse-fast {
     animation: pulse 0.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  .animate-slide-in {
+    animation: slide-in 0.2s ease-out;
   }
 }

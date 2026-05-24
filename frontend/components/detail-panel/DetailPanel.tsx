@@ -10,6 +10,14 @@ interface DetailPanelProps {
   onClose: () => void;
 }
 
+function formatValue(key: string, val: unknown): string {
+  if (val === null || val === undefined) return '—';
+  if (key === 'created_at' || key === 'updated_at') {
+    return new Date(String(val)).toLocaleString();
+  }
+  return String(val);
+}
+
 const READ_ONLY_FIELDS: Array<{ key: keyof Deployment; label: string }> = [
   { key: 'deployment_id', label: 'Deployment ID' },
   { key: 'version', label: 'Version' },
@@ -52,14 +60,6 @@ export default function DetailPanel({ deploymentId, onClose }: DetailPanelProps)
       </div>
     );
   }
-
-  const formatValue = (key: string, val: unknown): string => {
-    if (val === null || val === undefined) return '—';
-    if (key === 'created_at' || key === 'updated_at') {
-      return new Date(String(val)).toLocaleString();
-    }
-    return String(val);
-  };
 
   return (
     <div className="fixed inset-0 z-40 flex items-end justify-end">

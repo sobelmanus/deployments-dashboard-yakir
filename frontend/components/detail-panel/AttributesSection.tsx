@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { putDeployment } from '@/lib/api';
 import { useDeploymentsStore } from '@/store/deployments';
 import type { Deployment } from '@/types';
@@ -28,7 +28,7 @@ export default function AttributesSection({ deployment }: AttributesSectionProps
   const [keyErrors, setKeyErrors] = useState<Set<number>>(new Set());
   const newRowRef = useRef<HTMLInputElement | null>(null);
 
-  const initRows = () => {
+  const initRows = useCallback((): AttributeRow[] => {
     const attrs = deployment.attributes;
     const systemRows: AttributeRow[] = SYSTEM_ATTR_KEYS.filter((k) => k in attrs).map((k) => ({
       key: k,
@@ -45,7 +45,7 @@ export default function AttributesSection({ deployment }: AttributesSectionProps
         isNew: false,
       }));
     return [...systemRows, ...customRows];
-  };
+  }, [deployment]);
 
   const handleEdit = () => {
     setRows(initRows());
@@ -96,7 +96,7 @@ export default function AttributesSection({ deployment }: AttributesSectionProps
   const addRow = () => {
     setRows((prev) => [...prev, { key: '', value: '', markedForDeletion: false, isNew: true }]);
     // Focus the new row's key input after render
-    setTimeout(() => newRowRef.current?.focus(), 50);
+    setTimeout(() => newRowRef.current?.focus(), 0);
   };
 
   const updateRow = (idx: number, updates: Partial<AttributeRow>) => {
@@ -177,13 +177,14 @@ export default function AttributesSection({ deployment }: AttributesSectionProps
 
       <div className="space-y-2">
         {rows.map((row, idx) => {
+          const rowKey = row.isNew ? `__new__${idx}` : row.key;
           const isSystemKey = SYSTEM_ATTR_KEYS.includes(row.key) && !row.isNew;
           const isRegion = row.key === 'region';
           const isNameOrDesc = row.key === 'name' || row.key === 'description';
 
           return (
             <div
-              key={idx}
+              key={rowKey}
               className={`flex items-center gap-2 ${row.markedForDeletion ? 'opacity-50' : ''}`}
             >
               {/* Key */}
