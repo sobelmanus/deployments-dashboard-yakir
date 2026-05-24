@@ -1,6 +1,6 @@
 import type { Deployment, FieldConfig, PaginatedResponse } from '@/types';
 
-const API_BASE = 'http://localhost:8000';
+const API_BASE = '/api';
 
 export interface FetchDeploymentsParams {
   page?: number;
@@ -17,24 +17,18 @@ export interface FetchDeploymentsParams {
 export async function fetchDeployments(
   params: FetchDeploymentsParams = {}
 ): Promise<PaginatedResponse> {
-  const url = new URL(`${API_BASE}/deployments`);
-  if (params.page) url.searchParams.set('page', String(params.page));
-  if (params.limit) url.searchParams.set('limit', String(params.limit));
-  if (params.view) url.searchParams.set('view', params.view);
-  if (params.sort) url.searchParams.set('sort', params.sort);
-  if (params.order) url.searchParams.set('order', params.order);
-  if (params.updated_since) url.searchParams.set('updated_since', params.updated_since);
-  if (params.status?.length) {
-    params.status.forEach((s) => url.searchParams.append('status', s));
-  }
-  if (params.type?.length) {
-    params.type.forEach((t) => url.searchParams.append('type', t));
-  }
-  if (params.environment?.length) {
-    params.environment.forEach((e) => url.searchParams.append('environment', e));
-  }
+  const qs = new URLSearchParams();
+  if (params.page) qs.set('page', String(params.page));
+  if (params.limit) qs.set('limit', String(params.limit));
+  if (params.view) qs.set('view', params.view);
+  if (params.sort) qs.set('sort', params.sort);
+  if (params.order) qs.set('order', params.order);
+  if (params.updated_since) qs.set('updated_since', params.updated_since);
+  params.status?.forEach((s) => qs.append('status', s));
+  params.type?.forEach((t) => qs.append('type', t));
+  params.environment?.forEach((e) => qs.append('environment', e));
 
-  const res = await fetch(url.toString());
+  const res = await fetch(`${API_BASE}/deployments?${qs.toString()}`);
   if (!res.ok) throw new Error(`Failed to fetch deployments: ${res.status}`);
   return res.json();
 }

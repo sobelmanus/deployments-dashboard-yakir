@@ -81,7 +81,7 @@ function ChipRow({ chip, fieldOptions, onChange, onRemove }: ChipRowProps) {
     fieldOptions.find((f) => f.path === chip.field)?.label ?? chip.field;
 
   return (
-    <div className="flex items-center border border-gray-300 rounded overflow-hidden bg-white text-sm">
+    <div className="flex items-center border border-gray-300 rounded bg-white text-sm">
       {/* Field dropdown */}
       <div ref={dropRef} className="relative">
         <button

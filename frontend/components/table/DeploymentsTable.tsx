@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useContext, useMemo } from 'react';
+import { useState, useContext, useMemo, useEffect } from 'react';
 import {
   useReactTable,
   getCoreRowModel,
+  getPaginationRowModel,
   flexRender,
 } from '@tanstack/react-table';
 import { useDeploymentsStore } from '@/store/deployments';
@@ -22,6 +23,14 @@ export default function DeploymentsTable({ loading }: DeploymentsTableProps) {
   const { columns: colConfig } = useContext(ToolbarContext);
 
   const [hoveredRowId, setHoveredRowId] = useState<string | null>(null);
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 50 });
+  const [pageInputValue, setPageInputValue] = useState('1');
+
+  // Reset to first page whenever the filtered dataset changes
+  useEffect(() => {
+    setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+    setPageInputValue('1');
+  }, [viewData]);
 
   const visibleCols = useMemo(() => colConfig.filter((c) => c.visible), [colConfig]);
 
@@ -47,9 +56,21 @@ export default function DeploymentsTable({ loading }: DeploymentsTableProps) {
     data: viewData,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    state: { pagination },
+    onPaginationChange: setPagination,
     manualSorting: true,
     manualFiltering: true,
   });
+
+  const pageCount = table.getPageCount();
+  const currentPage = pagination.pageIndex + 1;
+
+  const goToPage = (page: number) => {
+    const clamped = Math.max(1, Math.min(page, pageCount));
+    setPagination((prev) => ({ ...prev, pageIndex: clamped - 1 }));
+    setPageInputValue(String(clamped));
+  };
 
   const isDeletedView = filterState.view === 'deleted';
 
@@ -91,12 +112,12 @@ export default function DeploymentsTable({ loading }: DeploymentsTableProps) {
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded overflow-hidden">
-      <div className="overflow-x-auto">
+    <div className="h-full flex flex-col bg-white border border-gray-200 rounded overflow-hidden">
+      <div className="flex-1 overflow-auto min-h-0">
         <table className="w-full text-sm border-collapse">
-          <thead>
+          <thead className="sticky top-0 z-10 bg-gray-50">
             {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id} className="border-b border-gray-200 bg-gray-50">
+              <tr key={headerGroup.id} className="border-b border-gray-200">
                 {headerGroup.headers.map((header) => (
                   <th key={header.id} className="px-4 py-3 text-left">
                     {header.isPlaceholder
@@ -159,11 +180,60 @@ export default function DeploymentsTable({ loading }: DeploymentsTableProps) {
           </tbody>
         </table>
       </div>
-      {viewData.length > 0 && (
-        <div className="px-4 py-2 text-xs text-gray-400 border-t border-gray-100">
-          {viewData.length} record{viewData.length !== 1 ? 's' : ''}
+
+      {/* Pagination footer */}
+      <div className="flex items-center px-4 py-2 border-t border-gray-100 text-xs text-gray-600 gap-4">
+        {/* Left: page size */}
+        <div className="flex items-center gap-2 w-40">
+          <span className="text-gray-400 whitespace-nowrap">Rows per page:</span>
+          <select
+            value={pagination.pageSize}
+            onChange={(e) => {
+              setPagination({ pageIndex: 0, pageSize: Number(e.target.value) });
+              setPageInputValue('1');
+            }}
+            className="border border-gray-200 rounded px-2 py-1"
+          >
+            {[20, 50, 100].map((size) => (
+              <option key={size} value={size}>{size}</option>
+            ))}
+          </select>
         </div>
-      )}
+
+        {/* Center: record count */}
+        <div className="flex-1 text-center text-gray-400">
+          {viewData.length === 0 ? 'No results' : (() => {
+            const from = pagination.pageIndex * pagination.pageSize + 1;
+            const to = Math.min((pagination.pageIndex + 1) * pagination.pageSize, viewData.length);
+            return `Displaying ${from}–${to} of ${viewData.length} results`;
+          })()}
+        </div>
+
+        {/* Right: page navigation */}
+        <div className="flex items-center gap-1 w-40 justify-end">
+          <button onClick={() => goToPage(1)} disabled={currentPage === 1}
+            className="px-2 py-1 rounded disabled:opacity-30 hover:bg-gray-100" title="First page">{'<<'}</button>
+          <button onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1}
+            className="px-2 py-1 rounded disabled:opacity-30 hover:bg-gray-100" title="Previous page">{'<'}</button>
+          <span className="flex items-center gap-1 px-1">
+            <input
+              type="number"
+              min={1}
+              max={pageCount}
+              value={pageInputValue}
+              onChange={(e) => setPageInputValue(e.target.value)}
+              onBlur={() => goToPage(Number(pageInputValue))}
+              onKeyDown={(e) => e.key === 'Enter' && goToPage(Number(pageInputValue))}
+              className="w-12 border border-gray-200 rounded px-1 py-0.5 text-center"
+            />
+            <span className="text-gray-400 whitespace-nowrap">of {pageCount}</span>
+          </span>
+          <button onClick={() => goToPage(currentPage + 1)} disabled={currentPage === pageCount}
+            className="px-2 py-1 rounded disabled:opacity-30 hover:bg-gray-100" title="Next page">{'>'}</button>
+          <button onClick={() => goToPage(pageCount)} disabled={currentPage === pageCount}
+            className="px-2 py-1 rounded disabled:opacity-30 hover:bg-gray-100" title="Last page">{'>>'}</button>
+        </div>
+      </div>
     </div>
   );
 }

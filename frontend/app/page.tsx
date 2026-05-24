@@ -131,9 +131,7 @@ export default function Home() {
     // Fetch field config
     fetchFieldConfig()
       .then(setFieldConfig)
-      .catch(() => {
-        // non-fatal
-      });
+      .catch((err) => console.error('field-config fetch failed:', err));
 
     // Bootstrap fetch: page 1 with URL filters
     const doBootstrap = async () => {
@@ -228,12 +226,12 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="h-full flex flex-col overflow-hidden">
       <header className="bg-white border-b border-gray-200 px-6 py-4">
         <h1 className="text-xl font-semibold text-gray-900">Deployments Dashboard</h1>
       </header>
 
-      <main className="flex-1 flex flex-col px-6 py-4 gap-3">
+      <main className="flex-1 flex flex-col px-6 py-4 gap-3 min-h-0">
         <ToolbarProvider>
         <Toolbar />
 
@@ -245,17 +243,24 @@ export default function Home() {
 
         {fetchError && (
           <div className="flex items-center gap-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded px-3 py-2">
-            <span>Error: {fetchError}</span>
+            <span className="flex-1">Error: {fetchError}</span>
             <button
               onClick={handleRetry}
-              className="underline font-medium hover:text-red-900"
+              className="underline font-medium hover:text-red-900 whitespace-nowrap"
             >
               Retry
+            </button>
+            <button
+              onClick={() => setFetchError(null)}
+              className="text-red-400 hover:text-red-700 font-medium leading-none"
+              aria-label="Dismiss error"
+            >
+              ×
             </button>
           </div>
         )}
 
-        <div className="flex-1">
+        <div className="flex-1 min-h-0">
           <DeploymentsTable loading={rawData.length === 0 && !fetchError} />
         </div>
         </ToolbarProvider>
