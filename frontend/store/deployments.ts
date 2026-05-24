@@ -42,6 +42,10 @@ function deriveViewData(rawData: Deployment[], filterState: FilterState): Deploy
   return applyFilters(rawData, filterState);
 }
 
+function copyField<T>(target: T, source: T, key: keyof T): void {
+  target[key] = source[key];
+}
+
 export const useDeploymentsStore = create<StoreState>((set, get) => ({
   rawData: [],
   fieldConfig: null,
@@ -79,7 +83,7 @@ export const useDeploymentsStore = create<StoreState>((set, get) => ({
               }
               merged.attributes = mergedAttrs;
             } else {
-              (merged as unknown as Record<string, unknown>)[key] = (update as unknown as Record<string, unknown>)[key];
+              copyField(merged, update, key);
             }
           }
           map.set(update.deployment_id, merged);
@@ -96,13 +100,12 @@ export const useDeploymentsStore = create<StoreState>((set, get) => ({
 
   updateRecord: (updated) =>
     set((state) => {
-      const newRaw = state.rawData.map((d) =>
-        d.deployment_id === updated.deployment_id ? updated : d
-      );
-      // If it's a new record, append
-      if (!state.rawData.find((d) => d.deployment_id === updated.deployment_id)) {
-        newRaw.push(updated);
-      }
+      let found = false;
+      const newRaw = state.rawData.map((d) => {
+        if (d.deployment_id === updated.deployment_id) { found = true; return updated; }
+        return d;
+      });
+      if (!found) newRaw.push(updated);
       return {
         rawData: newRaw,
         viewData: deriveViewData(newRaw, state.filterState),

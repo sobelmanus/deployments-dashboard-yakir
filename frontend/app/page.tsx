@@ -34,14 +34,14 @@ export default function Home() {
   const initializedRef = useRef(false);
 
   // Full prefetch: fetch all pages sequentially
-  const runFullPrefetch = useCallback(async () => {
+  const runFullPrefetch = useCallback(async (isBackground = false) => {
     if (prefetchAbortRef.current) {
       prefetchAbortRef.current.abort();
     }
     const controller = new AbortController();
     prefetchAbortRef.current = controller;
 
-    setPrefetchComplete(false);
+    if (!isBackground) setPrefetchComplete(false);
     const accumulated: Deployment[] = [];
 
     try {
@@ -101,7 +101,8 @@ export default function Home() {
       .then(setFieldConfig)
       .catch((err) => console.error('field-config fetch failed:', err));
 
-    // Bootstrap fetch: page 1 with URL filters
+    // Bootstrap fetch: page 1 with URL filters applied server-side for fast first paint.
+    // Note: search chips are client-side only and cannot be forwarded to the server.
     const doBootstrap = async () => {
       try {
         const res = await fetchDeployments({
@@ -144,7 +145,7 @@ export default function Home() {
   // Full re-fetch every 5min
   useEffect(() => {
     if (!prefetchComplete) return;
-    const id = setInterval(runFullPrefetch, FULL_REFETCH_INTERVAL_MS);
+    const id = setInterval(() => runFullPrefetch(true), FULL_REFETCH_INTERVAL_MS);
     return () => clearInterval(id);
   }, [prefetchComplete, runFullPrefetch]);
 
@@ -162,7 +163,8 @@ export default function Home() {
     }
 
     const panelChanged = prev.panel !== panel;
-    const fsChanged = JSON.stringify(prev.fs) !== JSON.stringify(fs);
+    // setFilterState always creates a new object, so reference inequality is sufficient
+    const fsChanged = prev.fs !== fs;
 
     if (!panelChanged && !fsChanged) return;
 
@@ -173,10 +175,12 @@ export default function Home() {
     pushFilterState(fs, panel, usePush);
   }, [filterState, openPanelId]);
 
-  const handleRetry = () => {
+  const handleClosePanel = useCallback(() => setOpenPanelId(null), [setOpenPanelId]);
+
+  const handleRetry = useCallback(() => {
     setFetchError(null);
     runFullPrefetch();
-  };
+  }, [setFetchError, runFullPrefetch]);
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
@@ -222,7 +226,7 @@ export default function Home() {
       {openPanelId && (
         <DetailPanel
           deploymentId={openPanelId}
-          onClose={() => setOpenPanelId(null)}
+          onClose={handleClosePanel}
         />
       )}
     </div>
