@@ -45,43 +45,53 @@ export default function Toolbar() {
 
   return (
     <div className={styles.toolbar}>
-      {/* Left: search chips */}
-      <div className={styles.searchArea}>
+      {/* Top-left: free search */}
+      <div className={styles.section}>
+        <span className={styles.sectionLabel}>Search</span>
         <SearchChips
           chips={filterState.chips}
           onChange={(chips) => update({ chips })}
         />
       </div>
 
-      {/* Center: filter dropdowns + column picker */}
-      <div className={styles.filtersArea}>
-        <FilterDropdown
-          label="Status"
-          options={['active', 'failed', 'stopped']}
-          selected={filterState.status}
-          onChange={(status) => update({ status })}
-        />
-        <FilterDropdown
-          label="Type"
-          options={['web_service', 'worker', 'cron_job']}
-          selected={filterState.type}
-          onChange={(type) => update({ type })}
-        />
-        <FilterDropdown
-          label="Environment"
-          options={['production', 'staging', 'development']}
-          selected={filterState.environment}
-          onChange={(environment) => update({ environment })}
-        />
-        <ColumnPicker columns={columns} onChange={setColumns} />
-      </div>
-
-      {/* Right: delete toggle */}
-      <div className={styles.rightArea}>
+      {/* Top-right: delete toggle */}
+      <div className={styles.section}>
+        <span className={styles.sectionLabel}>View</span>
         <DeleteToggle
           value={filterState.view}
           onChange={(view) => update({ view })}
         />
+      </div>
+
+      {/* Bottom-left: enum filters */}
+      <div className={styles.section}>
+        <span className={styles.sectionLabel}>Filters</span>
+        <div className={styles.filtersRow}>
+          <FilterDropdown
+            label="Status"
+            options={['active', 'failed', 'stopped']}
+            selected={filterState.status}
+            onChange={(status) => update({ status })}
+          />
+          <FilterDropdown
+            label="Type"
+            options={['web_service', 'worker', 'cron_job']}
+            selected={filterState.type}
+            onChange={(type) => update({ type })}
+          />
+          <FilterDropdown
+            label="Environment"
+            options={['production', 'staging', 'development']}
+            selected={filterState.environment}
+            onChange={(environment) => update({ environment })}
+          />
+        </div>
+      </div>
+
+      {/* Bottom-right: column picker */}
+      <div className={styles.section}>
+        <span className={styles.sectionLabel}>Columns</span>
+        <ColumnPicker columns={columns} onChange={setColumns} />
       </div>
     </div>
   );
