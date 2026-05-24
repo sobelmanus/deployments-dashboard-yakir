@@ -39,20 +39,17 @@ def _get_or_404(deployment_id: str) -> dict:
 
 
 def _register_custom_fields(attribute_keys: list[str]) -> None:
-    """Insert any unknown attribute keys into field_config as custom fields."""
+    """Upsert any unknown attribute keys into field_config as custom fields."""
     from startup import derive_label  # local import to avoid circular
 
     fc = get_field_config_collection()
     for key in attribute_keys:
         path = f"attributes.{key}"
-        if not fc.find_one({"path": path}):
-            fc.insert_one(
-                {
-                    "path": path,
-                    "label": derive_label(path),
-                    "type": "custom",
-                }
-            )
+        fc.update_one(
+            {"path": path},
+            {"$setOnInsert": {"path": path, "label": derive_label(path), "type": "custom"}},
+            upsert=True,
+        )
 
 
 # ---------------------------------------------------------------------------
