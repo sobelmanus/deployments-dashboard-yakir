@@ -1,0 +1,227 @@
+from datetime import datetime, timedelta, timezone
+from typing import Annotated
+
+from fastapi import APIRouter, HTTPException, Query, status
+
+from database import get_deployments_collection, get_field_config_collection
+from models import DeploymentListOut, DeploymentOut, DeploymentPatch, DeploymentPut
+from serialization import serialize_deployment
+
+router = APIRouter(prefix="/deployments", tags=["deployments"])
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+EXPIRY_HOURS = 720  # 30 days
+
+
+def _expiry_filter() -> dict:
+    """Filter that excludes hard-expired soft-deleted records."""
+    cutoff = datetime.now(timezone.utc) - timedelta(hours=EXPIRY_HOURS)
+    return {
+        "$or": [
+            {"deleted_at": None},
+            {"deleted_at": {"$gte": cutoff}},
+        ]
+    }
+
+
+def _get_or_404(deployment_id: str) -> dict:
+    """Fetch a deployment by deployment_id, raise 404 if not found or expired."""
+    collection = get_deployments_collection()
+    doc = collection.find_one(
+        {"deployment_id": deployment_id, **_expiry_filter()}
+    )
+    if not doc:
+        raise HTTPException(status_code=404, detail="Deployment not found")
+    return doc
+
+
+def _register_custom_fields(attribute_keys: list[str]) -> None:
+    """Insert any unknown attribute keys into field_config as custom fields."""
+    from startup import derive_label  # local import to avoid circular
+
+    fc = get_field_config_collection()
+    for key in attribute_keys:
+        path = f"attributes.{key}"
+        if not fc.find_one({"path": path}):
+            fc.insert_one(
+                {
+                    "path": path,
+                    "label": derive_label(path),
+                    "type": "custom",
+                }
+            )
+
+
+# ---------------------------------------------------------------------------
+# GET /deployments
+# ---------------------------------------------------------------------------
+
+@router.get("", response_model=DeploymentListOut)
+def list_deployments(
+    view: Annotated[str, Query()] = "existing",
+    status: Annotated[list[str], Query()] = [],
+    type: Annotated[list[str], Query()] = [],
+    environment: Annotated[list[str], Query()] = [],
+    sort: Annotated[str, Query()] = "created_at",
+    order: Annotated[str, Query()] = "desc",
+    page: Annotated[int, Query(ge=1)] = 1,
+    limit: Annotated[int, Query(ge=1, le=200)] = 50,
+    updated_since: Annotated[str | None, Query()] = None,
+) -> DeploymentListOut:
+    collection = get_deployments_collection()
+
+    # ---- updated_since: delta re-fetch ----
+    if updated_since is not None:
+        try:
+            since_dt = datetime.fromisoformat(updated_since.replace("Z", "+00:00"))
+        except ValueError:
+            raise HTTPException(status_code=422, detail="Invalid updated_since format")
+
+        query: dict = {"updated_at": {"$gt": since_dt}}
+        docs = list(collection.find(query, {"_id": 0}))
+        return DeploymentListOut(
+            items=[serialize_deployment(d) for d in docs],
+            total=len(docs),
+            page=1,
+            pages=1,
+        )
+
+    # ---- normal query ----
+    query = _expiry_filter()
+
+    # view filter
+    if view == "existing":
+        query["deleted_at"] = None
+    elif view == "deleted":
+        cutoff = datetime.now(timezone.utc) - timedelta(hours=EXPIRY_HOURS)
+        query["deleted_at"] = {"$ne": None, "$gte": cutoff}
+    # view == "all" → only expiry filter already applied
+
+    # enum filters
+    if status:
+        query["status"] = {"$in": status}
+    if type:
+        query["type"] = {"$in": type}
+    if environment:
+        query["environment"] = {"$in": environment}
+
+    # sort
+    sort_dir = 1 if order == "asc" else -1
+
+    # total count
+    total = collection.count_documents(query)
+
+    # pagination
+    skip = (page - 1) * limit
+    cursor = (
+        collection.find(query, {"_id": 0})
+        .sort(sort, sort_dir)
+        .skip(skip)
+        .limit(limit)
+    )
+
+    items = [serialize_deployment(d) for d in cursor]
+    pages = max(1, (total + limit - 1) // limit)
+
+    return DeploymentListOut(items=items, total=total, page=page, pages=pages)
+
+
+# ---------------------------------------------------------------------------
+# GET /deployments/{deployment_id}
+# ---------------------------------------------------------------------------
+
+@router.get("/{deployment_id}", response_model=DeploymentOut)
+def get_deployment(deployment_id: str) -> DeploymentOut:
+    doc = _get_or_404(deployment_id)
+    return serialize_deployment(doc)
+
+
+# ---------------------------------------------------------------------------
+# PATCH /deployments/{deployment_id}  — granular update
+# ---------------------------------------------------------------------------
+
+@router.patch("/{deployment_id}", response_model=DeploymentOut)
+def patch_deployment(deployment_id: str, body: DeploymentPatch) -> DeploymentOut:
+    _get_or_404(deployment_id)  # 404 guard
+
+    updates = body.model_dump()  # validated keys only
+    if not updates:
+        raise HTTPException(status_code=422, detail="Request body must not be empty")
+
+    now = datetime.now(timezone.utc)
+    set_doc = {**updates, "updated_at": now}
+
+    collection = get_deployments_collection()
+    updated = collection.find_one_and_update(
+        {"deployment_id": deployment_id},
+        {"$set": set_doc},
+        return_document=True,
+    )
+    return serialize_deployment(updated)
+
+
+# ---------------------------------------------------------------------------
+# PUT /deployments/{deployment_id}  — full attributes replacement
+# ---------------------------------------------------------------------------
+
+@router.put("/{deployment_id}", response_model=DeploymentOut)
+def put_deployment(deployment_id: str, body: DeploymentPut) -> DeploymentOut:
+    _get_or_404(deployment_id)  # 404 guard
+
+    now = datetime.now(timezone.utc)
+    collection = get_deployments_collection()
+    updated = collection.find_one_and_update(
+        {"deployment_id": deployment_id},
+        {"$set": {"attributes": body.attributes, "updated_at": now}},
+        return_document=True,
+    )
+
+    # Register new custom attribute keys
+    _register_custom_fields(list(body.attributes.keys()))
+
+    return serialize_deployment(updated)
+
+
+# ---------------------------------------------------------------------------
+# DELETE /deployments/{deployment_id}  — soft delete
+# ---------------------------------------------------------------------------
+
+@router.delete("/{deployment_id}", response_model=DeploymentOut)
+def delete_deployment(deployment_id: str) -> DeploymentOut:
+    doc = _get_or_404(deployment_id)
+
+    if doc.get("deleted_at") is not None:
+        raise HTTPException(status_code=409, detail="Deployment is already deleted")
+
+    now = datetime.now(timezone.utc)
+    collection = get_deployments_collection()
+    updated = collection.find_one_and_update(
+        {"deployment_id": deployment_id},
+        {"$set": {"deleted_at": now, "updated_at": now}},
+        return_document=True,
+    )
+    return serialize_deployment(updated)
+
+
+# ---------------------------------------------------------------------------
+# POST /deployments/{deployment_id}/restore
+# ---------------------------------------------------------------------------
+
+@router.post("/{deployment_id}/restore", response_model=DeploymentOut)
+def restore_deployment(deployment_id: str) -> DeploymentOut:
+    doc = _get_or_404(deployment_id)
+
+    if doc.get("deleted_at") is None:
+        raise HTTPException(status_code=409, detail="Deployment is not deleted")
+
+    now = datetime.now(timezone.utc)
+    collection = get_deployments_collection()
+    updated = collection.find_one_and_update(
+        {"deployment_id": deployment_id},
+        {"$set": {"deleted_at": None, "updated_at": now}},
+        return_document=True,
+    )
+    return serialize_deployment(updated)
