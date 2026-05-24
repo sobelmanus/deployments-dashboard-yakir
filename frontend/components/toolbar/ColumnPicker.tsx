@@ -58,7 +58,9 @@ function loadFromStorage(customPaths: string[]): ColumnConfig[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return buildDefaults(customPaths);
-    const saved: ColumnConfig[] = JSON.parse(raw);
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return buildDefaults(customPaths);
+    const saved = parsed as ColumnConfig[];
 
     // Merge saved with any new custom columns not yet in storage
     const savedPaths = new Set(saved.map((c) => c.path));
@@ -91,11 +93,15 @@ interface ColumnPickerProps {
 export function useColumnConfig(): [ColumnConfig[], (cols: ColumnConfig[]) => void] {
   const fieldConfig = useDeploymentsStore((s) => s.fieldConfig);
   const [columns, setColumnsState] = useState<ColumnConfig[]>([]);
+  const initializedRef = useRef(false);
 
   useEffect(() => {
-    const customPaths = (fieldConfig?.custom ?? []).map((f) => f.path);
-    const loaded = loadFromStorage(customPaths);
-    setColumnsState(loaded);
+    // Initialise exactly once, but wait until fieldConfig is loaded so
+    // custom attribute columns are included in the first (and only) init.
+    if (initializedRef.current || !fieldConfig) return;
+    initializedRef.current = true;
+    const customPaths = fieldConfig.custom.map((f) => f.path);
+    setColumnsState(loadFromStorage(customPaths));
   }, [fieldConfig]);
 
   const setColumns = useCallback((cols: ColumnConfig[]) => {

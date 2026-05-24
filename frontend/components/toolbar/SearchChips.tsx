@@ -66,6 +66,8 @@ interface ChipRowProps {
 function ChipRow({ chip, fieldOptions, onChange, onRemove }: ChipRowProps) {
   const [fieldOpen, setFieldOpen] = useState(false);
   const dropRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => { inputRef.current?.focus(); }, []);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -112,12 +114,12 @@ function ChipRow({ chip, fieldOptions, onChange, onRemove }: ChipRowProps) {
 
       {/* Value input */}
       <input
+        ref={inputRef}
         type="text"
         value={chip.value}
         onChange={(e) => onChange({ value: e.target.value })}
         placeholder="value…"
         className="px-2 py-1 outline-none text-gray-900 w-32"
-        autoFocus
       />
 
       {/* Remove */}
