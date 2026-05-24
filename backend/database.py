@@ -10,7 +10,11 @@ from config import get_settings
 @lru_cache(maxsize=1)
 def get_client() -> MongoClient:
     settings = get_settings()
-    return MongoClient(settings.mongodb_uri)
+    return MongoClient(
+        settings.mongodb_uri,
+        serverSelectionTimeoutMS=5000,
+        connectTimeoutMS=3000,
+    )
 
 
 def get_db() -> Database:
