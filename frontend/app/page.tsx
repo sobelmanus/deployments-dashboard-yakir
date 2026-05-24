@@ -9,6 +9,7 @@ import DeploymentsTable from '@/components/table/DeploymentsTable';
 import DetailPanel from '@/components/detail-panel/DetailPanel';
 import ThemeToggle from '@/components/ThemeToggle';
 import type { Deployment, FilterState } from '@/types';
+import styles from './page.module.css';
 
 const DELTA_INTERVAL_MS = 15_000;
 const FULL_REFETCH_INTERVAL_MS = 5 * 60_000;
@@ -184,34 +185,34 @@ export default function Home() {
   }, [setFetchError, runFullPrefetch]);
 
   return (
-    <div className="h-full flex flex-col overflow-hidden">
-      <header className="bg-surface border-b border-border px-6 py-4 flex items-center justify-between flex-shrink-0">
-        <h1 className="text-xl font-semibold text-text-primary">Deployments Dashboard</h1>
+    <div className={styles.root}>
+      <header className={styles.header}>
+        <h1 className={styles.headerTitle}>Deployments Dashboard</h1>
         <ThemeToggle />
       </header>
 
-      <main className="flex-1 flex flex-col px-6 py-4 gap-3 min-h-0">
+      <main className={styles.main}>
         <ToolbarProvider>
         <Toolbar />
 
         {!prefetchComplete && (
-          <div className="text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded px-3 py-1.5">
+          <div className={styles.loadingBanner}>
             Loading full dataset for instant filtering…
           </div>
         )}
 
         {fetchError && (
-          <div className="flex items-center gap-3 text-sm text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded px-3 py-2">
-            <span className="flex-1">Error: {fetchError}</span>
+          <div className={styles.errorBanner}>
+            <span className={styles.errorText}>Error: {fetchError}</span>
             <button
               onClick={handleRetry}
-              className="underline font-medium hover:text-red-900 whitespace-nowrap"
+              className={styles.errorRetry}
             >
               Retry
             </button>
             <button
               onClick={() => setFetchError(null)}
-              className="text-red-400 hover:text-red-700 font-medium leading-none"
+              className={styles.errorDismiss}
               aria-label="Dismiss error"
             >
               ×
@@ -219,7 +220,7 @@ export default function Home() {
           </div>
         )}
 
-        <div className="flex-1 min-h-0">
+        <div className={styles.tableWrapper}>
           <DeploymentsTable loading={rawData.length === 0 && !fetchError} />
         </div>
         </ToolbarProvider>

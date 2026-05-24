@@ -1,0 +1,119 @@
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.addButton {
+  padding: 4px 8px;
+  font-size: 14px;
+  border: 1px dashed var(--color-border);
+  border-radius: 6px;
+  color: var(--color-text-secondary);
+  background: none;
+  cursor: pointer;
+  transition: background-color 150ms, color 150ms, border-color 150ms;
+}
+
+.addButton:hover {
+  border-color: var(--color-border);
+  color: var(--color-text-primary);
+}
+
+/* ChipRow */
+.chip {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background-color: var(--color-surface);
+  font-size: 14px;
+}
+
+.fieldWrapper {
+  position: relative;
+}
+
+.fieldButton {
+  padding: 4px 8px;
+  border-right: 1px solid var(--color-border-light);
+  color: var(--color-text-secondary);
+  background: none;
+  border-top: none;
+  border-bottom: none;
+  border-left: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 150ms;
+}
+
+.fieldButton:hover {
+  background-color: var(--color-surface-hover);
+}
+
+.dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 4px;
+  width: 192px;
+  background-color: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -4px rgba(0,0,0,.1);
+  z-index: 30;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+:global(.dark) .dropdown {
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,.4);
+}
+
+.dropdownOption {
+  width: 100%;
+  text-align: left;
+  padding: 8px 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-primary);
+  transition: background-color 150ms;
+}
+
+.dropdownOption:hover {
+  background-color: var(--color-surface-hover);
+}
+
+.dropdownOptionSelected {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+}
+
+:global(.dark) .dropdownOptionSelected {
+  background-color: rgba(30, 64, 175, 0.2);
+  color: #60a5fa;
+}
+
+.valueInput {
+  padding: 4px 8px;
+  outline: none;
+  color: var(--color-text-primary);
+  background: transparent;
+  border: none;
+  width: 128px;
+}
+
+.removeButton {
+  padding: 4px 8px;
+  color: var(--color-text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 150ms;
+}
+
+.removeButton:hover {
+  color: #ef4444;
+}

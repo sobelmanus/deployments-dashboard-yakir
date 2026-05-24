@@ -18,6 +18,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { useDeploymentsStore } from '@/store/deployments';
 import type { ColumnConfig } from '@/types';
+import styles from './ColumnPicker.module.css';
 
 const STORAGE_KEY = 'dashboard_columns';
 
@@ -159,15 +160,15 @@ export default function ColumnPicker({ columns, onChange }: ColumnPickerProps) {
   };
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className={styles.wrapper}>
       <button
         onClick={() => setOpen((o) => !o)}
-        className="px-3 py-1.5 text-sm border border-border rounded text-text-secondary bg-surface hover:bg-surface-hover"
+        className={styles.trigger}
       >
         Columns ▾
       </button>
       {open && (
-        <div className="absolute top-full right-0 mt-1 w-64 bg-surface-raised border border-border rounded shadow-lg dark:shadow-black/40 z-20">
+        <div className={styles.dropdown}>
           <Section
             title="System Columns"
             cols={systemCols}
@@ -184,10 +185,10 @@ export default function ColumnPicker({ columns, onChange }: ColumnPickerProps) {
               sensors={sensors}
             />
           )}
-          <div className="border-t border-border-light px-3 py-2">
+          <div className={styles.footerRow}>
             <button
               onClick={resetToDefaults}
-              className="text-xs text-text-muted hover:text-text-secondary underline"
+              className={styles.resetButton}
             >
               Reset to defaults
             </button>
@@ -208,8 +209,8 @@ interface SectionProps {
 
 function Section({ title, cols, onToggle, onDragEnd, sensors }: SectionProps) {
   return (
-    <div className="border-b border-border-light last:border-0">
-      <div className="px-3 py-2 text-xs font-semibold text-text-muted uppercase tracking-wide">
+    <div className={styles.section}>
+      <div className={styles.sectionTitle}>
         {title}
       </div>
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
@@ -243,22 +244,22 @@ function SortableColumnRow({
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center gap-2 px-3 py-2 hover:bg-surface-hover"
+      className={styles.row}
     >
       <span
         {...attributes}
         {...listeners}
-        className="text-text-muted cursor-grab hover:text-text-secondary select-none"
+        className={styles.dragHandle}
         title="Drag to reorder"
       >
         ⠿
       </span>
-      <label className="flex items-center gap-2 cursor-pointer flex-1 text-sm">
+      <label className={styles.rowLabel}>
         <input
           type="checkbox"
           checked={col.visible}
           onChange={() => onToggle(col.path)}
-          className="accent-blue-600"
+          className={styles.checkbox}
         />
         {col.label}
       </label>

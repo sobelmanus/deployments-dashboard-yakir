@@ -1,0 +1,70 @@
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 6px;
+}
+
+:global(.dark) .backdrop {
+  background: rgba(15, 23, 42, 0.8);
+}
+
+.dialog {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,.1);
+  font-size: 14px;
+}
+
+:global(.dark) .dialog {
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,.4);
+}
+
+.question {
+  color: var(--color-text-primary);
+}
+
+.confirmButton {
+  padding: 4px 12px;
+  background-color: #dc2626;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 150ms;
+}
+
+.confirmButton:hover {
+  background-color: #b91c1c;
+}
+
+.cancelButton {
+  padding: 4px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-text-secondary);
+  background: none;
+  cursor: pointer;
+  transition: background-color 150ms;
+}
+
+.cancelButton:hover {
+  background-color: var(--color-surface-hover);
+}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import styles from './DeleteOverlay.module.css';
 
 interface DeleteOverlayProps {
   onConfirm: () => void;
@@ -27,20 +28,20 @@ export default function DeleteOverlay({ onConfirm, onCancel }: DeleteOverlayProp
   }, [onCancel]);
 
   return (
-    <div className="absolute inset-0 z-10 flex items-center justify-center">
+    <div className={styles.overlay}>
       {/* semi-transparent backdrop over the row */}
-      <div className="absolute inset-0 bg-surface/80 rounded" />
+      <div className={styles.backdrop} />
       <div
         ref={overlayRef}
-        className="relative z-10 flex items-center gap-3 px-4 py-2 bg-surface border border-border rounded shadow-md dark:shadow-black/40 text-sm"
+        className={styles.dialog}
       >
-        <span className="text-text-primary">Delete this deployment?</span>
+        <span className={styles.question}>Delete this deployment?</span>
         <button
           onClick={(e) => {
             e.stopPropagation();
             onConfirm();
           }}
-          className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 font-medium"
+          className={styles.confirmButton}
         >
           Confirm
         </button>
@@ -49,7 +50,7 @@ export default function DeleteOverlay({ onConfirm, onCancel }: DeleteOverlayProp
             e.stopPropagation();
             onCancel();
           }}
-          className="px-3 py-1 border border-border rounded hover:bg-surface-hover text-text-secondary"
+          className={styles.cancelButton}
         >
           Cancel
         </button>

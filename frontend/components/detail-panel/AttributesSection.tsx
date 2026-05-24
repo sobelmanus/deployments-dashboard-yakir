@@ -1,9 +1,11 @@
 'use client';
 
 import { useState, useRef, useCallback } from 'react';
+import clsx from 'clsx';
 import { putDeployment } from '@/lib/api';
 import { useDeploymentsStore } from '@/store/deployments';
 import type { Deployment } from '@/types';
+import styles from './AttributesSection.module.css';
 
 interface AttributeRow {
   key: string;
@@ -113,31 +115,31 @@ export default function AttributesSection({ deployment }: AttributesSectionProps
 
   if (!editing) {
     return (
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wide">
+      <div className={styles.section}>
+        <div className={styles.sectionHeader}>
+          <h3 className={styles.sectionTitle}>
             Attributes
           </h3>
           <button
             onClick={handleEdit}
-            className="px-3 py-1 text-xs border border-border rounded hover:bg-surface-hover text-text-secondary"
+            className={styles.editButton}
           >
             Edit
           </button>
         </div>
-        <dl className="space-y-2">
+        <dl className={styles.fieldList}>
           {SYSTEM_ATTR_KEYS.filter((k) => k in attrs).map((k) => (
-            <div key={k} className="flex gap-3">
-              <dt className="w-28 flex-shrink-0 text-xs text-text-secondary capitalize">{k}</dt>
-              <dd className="text-sm text-text-primary break-all">{attrs[k] || '—'}</dd>
+            <div key={k} className={styles.fieldRow}>
+              <dt className={styles.fieldLabel}>{k}</dt>
+              <dd className={styles.fieldValue}>{attrs[k] || '—'}</dd>
             </div>
           ))}
           {Object.entries(attrs)
             .filter(([k]) => !SYSTEM_ATTR_KEYS.includes(k))
             .map(([k, v]) => (
-              <div key={k} className="flex gap-3">
-                <dt className="w-28 flex-shrink-0 text-xs text-text-secondary">{k}</dt>
-                <dd className="text-sm text-text-primary break-all">{v || '—'}</dd>
+              <div key={k} className={styles.fieldRow}>
+                <dt className={styles.fieldLabel}>{k}</dt>
+                <dd className={styles.fieldValue}>{v || '—'}</dd>
               </div>
             ))}
         </dl>
@@ -146,23 +148,23 @@ export default function AttributesSection({ deployment }: AttributesSectionProps
   }
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wide">
+    <div className={styles.section}>
+      <div className={styles.sectionHeader}>
+        <h3 className={styles.sectionTitle}>
           Attributes
         </h3>
-        <div className="flex gap-2">
+        <div className={styles.actionButtons}>
           <button
             onClick={handleCancel}
             disabled={saving}
-            className="px-3 py-1 text-xs border border-border rounded hover:bg-surface-hover text-text-secondary disabled:opacity-50"
+            className={styles.cancelButton}
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 flex items-center gap-1"
+            className={styles.saveButton}
           >
             {saving ? 'Saving…' : 'Save'}
           </button>
@@ -170,55 +172,52 @@ export default function AttributesSection({ deployment }: AttributesSectionProps
       </div>
 
       {error && (
-        <div className="mb-3 text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded px-2 py-1.5">
+        <div className={styles.errorBanner}>
           {error}
         </div>
       )}
 
-      <div className="space-y-2">
+      <div className={styles.rowList}>
         {rows.map((row, idx) => {
           const rowKey = row.isNew ? `__new__${idx}` : row.key;
           const isSystemKey = SYSTEM_ATTR_KEYS.includes(row.key) && !row.isNew;
           const isRegion = row.key === 'region';
-          const isNameOrDesc = row.key === 'name' || row.key === 'description';
 
           return (
             <div
               key={rowKey}
-              className={`flex items-center gap-2 ${row.markedForDeletion ? 'opacity-50' : ''}`}
+              className={clsx(styles.editRow, row.markedForDeletion && styles.editRowDimmed)}
             >
               {/* Key */}
               {isSystemKey ? (
-                <span className="w-28 flex-shrink-0 text-xs text-text-secondary capitalize">{row.key}</span>
+                <span className={styles.systemKeyLabel}>{row.key}</span>
               ) : (
-                <div className="w-28 flex-shrink-0">
+                <div className={styles.keyInputWrapper}>
                   <input
                     ref={row.isNew && idx === rows.length - 1 ? newRowRef : undefined}
                     type="text"
                     value={row.key}
                     onChange={(e) => updateRow(idx, { key: e.target.value })}
                     disabled={row.markedForDeletion}
-                    className={`w-full text-xs border rounded px-2 py-1 outline-none text-text-primary bg-surface ${
-                      keyErrors.has(idx) ? 'border-red-400 bg-red-50 dark:bg-red-900/20' : 'border-border'
-                    } disabled:bg-surface-hover disabled:text-text-muted`}
+                    className={clsx(styles.keyInput, keyErrors.has(idx) && styles.keyInputError)}
                     placeholder="key"
                   />
                   {keyErrors.has(idx) && (
-                    <span className="text-xs text-red-500">Required</span>
+                    <span className={styles.keyRequiredError}>Required</span>
                   )}
                 </div>
               )}
 
               {/* Value */}
               {isRegion ? (
-                <span className="flex-1 text-sm text-text-secondary">{row.value || '—'}</span>
+                <span className={styles.readOnlyValue}>{row.value || '—'}</span>
               ) : (
                 <input
                   type="text"
                   value={row.value}
                   onChange={(e) => updateRow(idx, { value: e.target.value })}
                   disabled={row.markedForDeletion}
-                  className="flex-1 text-sm border border-border rounded px-2 py-1 outline-none focus:border-blue-400 text-text-primary bg-surface disabled:bg-surface-hover disabled:text-text-muted"
+                  className={styles.valueInput}
                   placeholder="value"
                 />
               )}
@@ -228,7 +227,7 @@ export default function AttributesSection({ deployment }: AttributesSectionProps
                 <button
                   onClick={() => toggleDelete(idx)}
                   title={row.markedForDeletion ? 'Undo' : 'Mark for deletion'}
-                  className="text-text-muted hover:text-red-500 text-sm leading-none"
+                  className={styles.deleteMarker}
                 >
                   {row.markedForDeletion ? '↩' : '×'}
                 </button>
@@ -240,7 +239,7 @@ export default function AttributesSection({ deployment }: AttributesSectionProps
 
       <button
         onClick={addRow}
-        className="mt-3 text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
+        className={styles.addRowButton}
       >
         + Add row
       </button>

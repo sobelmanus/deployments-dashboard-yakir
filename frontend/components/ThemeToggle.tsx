@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import styles from './ThemeToggle.module.css';
 
 export default function ThemeToggle() {
   const [dark, setDark] = useState(false);
@@ -24,7 +25,7 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={toggle}
-      className="px-3 py-1.5 text-sm border border-border rounded text-text-secondary bg-surface hover:bg-surface-hover transition-colors"
+      className={styles.button}
       aria-label="Toggle theme"
     >
       {dark ? '☀ Light' : '☾ Dark'}

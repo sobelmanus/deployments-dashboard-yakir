@@ -3,18 +3,7 @@ import type { Deployment, ColumnConfig } from '@/types';
 import InlineEditCell from './InlineEditCell';
 import RowActions from './RowActions';
 import { getFieldValue } from '@/lib/utils';
-
-const STATUS_COLORS: Record<string, string> = {
-  active: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
-  failed: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
-  stopped: 'bg-gray-100 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300',
-};
-
-const ENV_COLORS: Record<string, string> = {
-  production: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
-  staging: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
-  development: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
-};
+import badgeStyles from './Badge.module.css';
 
 export function buildColumns(
   visibleCols: ColumnConfig[],
@@ -31,11 +20,25 @@ export function buildColumns(
       id: colConfig.path,
       header: () => (
         <button
-          className="flex items-center gap-1 text-left font-semibold text-xs uppercase tracking-wide text-text-secondary hover:text-text-primary"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 4,
+            textAlign: 'left',
+            fontWeight: 600,
+            fontSize: 12,
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+            color: 'var(--color-text-secondary)',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            padding: 0,
+          }}
           onClick={() => onSort(colConfig.path)}
         >
           {colConfig.label}
-          <span className="text-text-muted">
+          <span style={{ color: 'var(--color-text-muted)' }}>
             {filterState.sort === colConfig.path
               ? filterState.order === 'asc'
                 ? ' ↑'
@@ -77,38 +80,36 @@ export function buildColumns(
         const value = getFieldValue(deployment, colConfig.path);
 
         if (colConfig.path === 'status') {
+          const statusClass = badgeStyles[value as keyof typeof badgeStyles];
           return (
-            <span
-              className={`inline-flex px-1.5 py-0.5 rounded text-xs font-medium ${STATUS_COLORS[value] ?? ''}`}
-            >
+            <span className={`${badgeStyles.badge}${statusClass ? ` ${statusClass}` : ''}`}>
               {value}
             </span>
           );
         }
         if (colConfig.path === 'environment') {
+          const envClass = badgeStyles[value as keyof typeof badgeStyles];
           return (
-            <span
-              className={`inline-flex px-1.5 py-0.5 rounded text-xs font-medium ${ENV_COLORS[value] ?? ''}`}
-            >
+            <span className={`${badgeStyles.badge}${envClass ? ` ${envClass}` : ''}`}>
               {value}
             </span>
           );
         }
         if (colConfig.path === 'type') {
           return (
-            <span className="text-sm text-text-secondary">{value.replace(/_/g, ' ')}</span>
+            <span style={{ fontSize: 14, color: 'var(--color-text-secondary)' }}>{value.replace(/_/g, ' ')}</span>
           );
         }
         if (colConfig.path === 'created_at' || colConfig.path === 'updated_at') {
           return (
-            <span className="text-sm text-text-secondary">
+            <span style={{ fontSize: 14, color: 'var(--color-text-secondary)' }}>
               {value ? new Date(value).toLocaleString() : '—'}
             </span>
           );
         }
 
         return (
-          <span className="text-sm text-text-secondary truncate block max-w-xs">
+          <span style={{ fontSize: 14, color: 'var(--color-text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block', maxWidth: 320 }}>
             {value || '—'}
           </span>
         );

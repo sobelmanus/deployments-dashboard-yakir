@@ -1,0 +1,107 @@
+.wrapper {
+  position: relative;
+}
+
+.trigger {
+  padding: 6px 12px;
+  font-size: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-text-secondary);
+  background-color: var(--color-surface);
+  cursor: pointer;
+  transition: background-color 150ms, color 150ms;
+}
+
+.trigger:hover {
+  background-color: var(--color-surface-hover);
+}
+
+.dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  width: 256px;
+  background-color: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -4px rgba(0,0,0,.1);
+  z-index: 20;
+}
+
+:global(.dark) .dropdown {
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,.4);
+}
+
+.section {
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.section:last-child {
+  border-bottom: none;
+}
+
+.sectionTitle {
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  transition: background-color 150ms;
+}
+
+.row:hover {
+  background-color: var(--color-surface-hover);
+}
+
+.dragHandle {
+  color: var(--color-text-muted);
+  cursor: grab;
+  user-select: none;
+  transition: color 150ms;
+}
+
+.dragHandle:hover {
+  color: var(--color-text-secondary);
+}
+
+.rowLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  flex: 1;
+  font-size: 14px;
+}
+
+.checkbox {
+  accent-color: #2563eb;
+}
+
+.footerRow {
+  border-top: 1px solid var(--color-border-light);
+  padding: 8px 12px;
+}
+
+.resetButton {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  text-decoration: underline;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 150ms;
+}
+
+.resetButton:hover {
+  color: var(--color-text-secondary);
+}

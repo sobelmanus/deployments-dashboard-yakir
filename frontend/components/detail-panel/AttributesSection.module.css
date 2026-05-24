@@ -1,0 +1,242 @@
+.section {
+  /* top-level container */
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.sectionTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.editButton {
+  padding: 4px 12px;
+  font-size: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-text-secondary);
+  background: none;
+  cursor: pointer;
+  transition: background-color 150ms;
+}
+
+.editButton:hover {
+  background-color: var(--color-surface-hover);
+}
+
+/* Read-only view */
+.fieldList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fieldRow {
+  display: flex;
+  gap: 12px;
+}
+
+.fieldLabel {
+  width: 112px;
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  text-transform: capitalize;
+}
+
+.fieldValue {
+  font-size: 14px;
+  color: var(--color-text-primary);
+  word-break: break-all;
+}
+
+/* Edit mode */
+.actionButtons {
+  display: flex;
+  gap: 8px;
+}
+
+.cancelButton {
+  padding: 4px 12px;
+  font-size: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-text-secondary);
+  background: none;
+  cursor: pointer;
+  transition: background-color 150ms;
+}
+
+.cancelButton:hover {
+  background-color: var(--color-surface-hover);
+}
+
+.cancelButton:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.saveButton {
+  padding: 4px 12px;
+  font-size: 12px;
+  background-color: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: background-color 150ms;
+}
+
+.saveButton:hover {
+  background-color: #1d4ed8;
+}
+
+.saveButton:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.errorBanner {
+  margin-bottom: 12px;
+  font-size: 12px;
+  color: #dc2626;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  padding: 6px 8px;
+}
+
+:global(.dark) .errorBanner {
+  color: #f87171;
+  background: rgba(127, 29, 29, 0.2);
+  border-color: #7f1d1d;
+}
+
+.rowList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.editRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.editRowDimmed {
+  opacity: 0.5;
+}
+
+.systemKeyLabel {
+  width: 112px;
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  text-transform: capitalize;
+}
+
+.keyInputWrapper {
+  width: 112px;
+  flex-shrink: 0;
+}
+
+.keyInput {
+  width: 100%;
+  font-size: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 4px 8px;
+  outline: none;
+  color: var(--color-text-primary);
+  background-color: var(--color-surface);
+  transition: border-color 150ms;
+}
+
+.keyInputError {
+  border-color: #f87171;
+  background-color: #fef2f2;
+}
+
+:global(.dark) .keyInputError {
+  background-color: rgba(127, 29, 29, 0.2);
+}
+
+.keyInput:disabled {
+  background-color: var(--color-surface-hover);
+  color: var(--color-text-muted);
+}
+
+.keyRequiredError {
+  font-size: 12px;
+  color: #ef4444;
+}
+
+.readOnlyValue {
+  flex: 1;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.valueInput {
+  flex: 1;
+  font-size: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 4px 8px;
+  outline: none;
+  color: var(--color-text-primary);
+  background-color: var(--color-surface);
+  transition: border-color 150ms;
+}
+
+.valueInput:focus {
+  border-color: #60a5fa;
+}
+
+.valueInput:disabled {
+  background-color: var(--color-surface-hover);
+  color: var(--color-text-muted);
+}
+
+.deleteMarker {
+  color: var(--color-text-muted);
+  font-size: 14px;
+  line-height: 1;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 150ms;
+}
+
+.deleteMarker:hover {
+  color: #ef4444;
+}
+
+.addRowButton {
+  margin-top: 12px;
+  font-size: 12px;
+  color: #2563eb;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 150ms;
+}
+
+.addRowButton:hover {
+  color: #1e40af;
+}

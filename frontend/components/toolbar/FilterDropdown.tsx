@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import clsx from 'clsx';
+import styles from './FilterDropdown.module.css';
 
 interface FilterDropdownProps {
   label: string;
@@ -39,38 +41,34 @@ export default function FilterDropdown({
   const displayLabel = selected.length > 0 ? `${label} (${selected.length})` : `${label} ▾`;
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className={styles.wrapper}>
       <button
         onClick={() => setOpen((o) => !o)}
-        className={`px-3 py-1.5 text-sm border rounded flex items-center gap-1 ${
-          selected.length > 0
-            ? 'border-blue-500 text-blue-700 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400'
-            : 'border-border text-text-secondary bg-surface hover:bg-surface-hover'
-        }`}
+        className={clsx(styles.trigger, selected.length > 0 && styles.triggerActive)}
       >
         {displayLabel}
       </button>
       {open && (
-        <div className="absolute top-full left-0 mt-1 w-48 bg-surface-raised border border-border rounded shadow-lg dark:shadow-black/40 z-20">
+        <div className={styles.dropdown}>
           {options.map((opt) => (
             <label
               key={opt}
-              className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-surface-hover cursor-pointer"
+              className={styles.option}
             >
               <input
                 type="checkbox"
                 checked={selected.includes(opt)}
                 onChange={() => toggle(opt)}
-                className="accent-blue-600"
+                className={styles.checkbox}
               />
               <span className="capitalize">{opt.replace(/_/g, ' ')}</span>
             </label>
           ))}
           {selected.length > 0 && (
-            <div className="border-t border-border-light px-3 py-2">
+            <div className={styles.clearRow}>
               <button
                 onClick={() => onChange([])}
-                className="text-xs text-text-secondary hover:text-text-primary"
+                className={styles.clearButton}
               >
                 Clear
               </button>

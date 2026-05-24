@@ -6,6 +6,7 @@ import SearchChips from './SearchChips';
 import FilterDropdown from './FilterDropdown';
 import ColumnPicker, { useColumnConfig } from './ColumnPicker';
 import DeleteToggle from './DeleteToggle';
+import styles from './Toolbar.module.css';
 
 // We expose columns via a context so the table can read them
 import { createContext, useContext } from 'react';
@@ -43,9 +44,9 @@ export default function Toolbar() {
   };
 
   return (
-    <div className="flex items-center gap-3 flex-wrap bg-surface border border-border rounded px-3 py-2">
+    <div className={styles.toolbar}>
       {/* Left: search chips */}
-      <div className="flex-1 min-w-0">
+      <div className={styles.searchArea}>
         <SearchChips
           chips={filterState.chips}
           onChange={(chips) => update({ chips })}
@@ -53,7 +54,7 @@ export default function Toolbar() {
       </div>
 
       {/* Center: filter dropdowns + column picker */}
-      <div className="flex items-center gap-2 flex-shrink-0">
+      <div className={styles.filtersArea}>
         <FilterDropdown
           label="Status"
           options={['active', 'failed', 'stopped']}
@@ -76,7 +77,7 @@ export default function Toolbar() {
       </div>
 
       {/* Right: delete toggle */}
-      <div className="flex-shrink-0">
+      <div className={styles.rightArea}>
         <DeleteToggle
           value={filterState.view}
           onChange={(view) => update({ view })}

@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import { useDeploymentsStore } from '@/store/deployments';
 import AttributesSection from './AttributesSection';
 import type { Deployment } from '@/types';
+import styles from './DetailPanel.module.css';
 
 interface DetailPanelProps {
   deploymentId: string;
@@ -52,34 +53,34 @@ export default function DetailPanel({ deploymentId, onClose }: DetailPanelProps)
 
   if (!deployment) {
     return (
-      <div className="fixed inset-0 z-40 flex items-end justify-end">
-        <div ref={backdropRef} className="absolute inset-0 bg-black/30" onClick={handleBackdropClick} />
-        <div className="relative w-[480px] h-full bg-surface border-l border-border shadow-2xl flex items-center justify-center">
-          <p className="text-text-muted">Deployment not found</p>
+      <div className={styles.root}>
+        <div ref={backdropRef} className={styles.backdrop} onClick={handleBackdropClick} />
+        <div className={`${styles.panel} ${styles.notFoundPanel} animate-slide-in`}>
+          <p className={styles.notFoundText}>Deployment not found</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="fixed inset-0 z-40 flex items-end justify-end">
+    <div className={styles.root}>
       {/* Backdrop */}
       <div
         ref={backdropRef}
-        className="absolute inset-0 bg-black/30"
+        className={styles.backdrop}
         onClick={handleBackdropClick}
       />
 
       {/* Panel */}
-      <div className="relative w-[480px] max-w-full h-full bg-surface border-l border-border shadow-2xl flex flex-col overflow-hidden animate-slide-in">
+      <div className={`${styles.panel} animate-slide-in`}>
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-border flex-shrink-0">
-          <h2 className="text-base font-semibold text-text-primary truncate">
+        <div className={styles.panelHeader}>
+          <h2 className={styles.panelTitle}>
             {deployment.attributes.name || deployment.deployment_id}
           </h2>
           <button
             onClick={onClose}
-            className="text-text-muted hover:text-text-secondary text-xl leading-none ml-2 flex-shrink-0"
+            className={styles.closeButton}
             aria-label="Close panel"
           >
             ×
@@ -87,26 +88,28 @@ export default function DetailPanel({ deploymentId, onClose }: DetailPanelProps)
         </div>
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto p-5 space-y-6">
-          {/* Read-only section */}
-          <div>
-            <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wide mb-3">
-              Details
-            </h3>
-            <dl className="space-y-2">
-              {READ_ONLY_FIELDS.map(({ key, label }) => (
-                <div key={key} className="flex gap-3">
-                  <dt className="w-32 flex-shrink-0 text-xs text-text-secondary">{label}</dt>
-                  <dd className="text-sm text-text-primary break-all">
-                    {formatValue(key, deployment[key])}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          </div>
+        <div className={styles.panelBody}>
+          <div className={styles.bodyStack}>
+            {/* Read-only section */}
+            <div className={styles.section}>
+              <h3 className={styles.sectionTitle}>
+                Details
+              </h3>
+              <dl className={styles.fieldList}>
+                {READ_ONLY_FIELDS.map(({ key, label }) => (
+                  <div key={key} className={styles.fieldRow}>
+                    <dt className={styles.fieldLabel}>{label}</dt>
+                    <dd className={styles.fieldValue}>
+                      {formatValue(key, deployment[key])}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
 
-          {/* Attributes section */}
-          <AttributesSection deployment={deployment} />
+            {/* Attributes section */}
+            <AttributesSection deployment={deployment} />
+          </div>
         </div>
       </div>
     </div>

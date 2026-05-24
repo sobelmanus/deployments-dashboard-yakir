@@ -5,6 +5,7 @@ import { useDeploymentsStore } from '@/store/deployments';
 import { deleteDeployment, restoreDeployment } from '@/lib/api';
 import type { Deployment } from '@/types';
 import DeleteOverlay from './DeleteOverlay';
+import styles from './RowActions.module.css';
 
 interface RowActionsProps {
   deployment: Deployment;
@@ -52,12 +53,12 @@ export default function RowActions({ deployment, isHovered, onInFlight }: RowAct
   };
 
   return (
-    <div className="relative flex items-center justify-end gap-2 min-w-[80px]">
+    <div className={styles.wrapper}>
       {error && (
-        <span className="text-xs text-red-500 dark:text-red-400 mr-1">{error}</span>
+        <span className={styles.errorText}>{error}</span>
       )}
       {inFlight && (
-        <span className="text-xs text-text-muted animate-pulse">…</span>
+        <span className={`${styles.inFlight} animate-pulse`}>…</span>
       )}
       {!inFlight && !error && isHovered && !isDeleted && !showConfirm && (
         <button
@@ -65,7 +66,7 @@ export default function RowActions({ deployment, isHovered, onInFlight }: RowAct
             e.stopPropagation();
             setShowConfirm(true);
           }}
-          className="px-2 py-0.5 text-xs border border-red-300 text-red-600 rounded hover:bg-red-50"
+          className={styles.deleteButton}
         >
           Delete
         </button>
@@ -76,7 +77,7 @@ export default function RowActions({ deployment, isHovered, onInFlight }: RowAct
             e.stopPropagation();
             handleRestore();
           }}
-          className="px-2 py-0.5 text-xs border border-green-300 text-green-600 rounded hover:bg-green-50"
+          className={styles.restoreButton}
         >
           Restore
         </button>

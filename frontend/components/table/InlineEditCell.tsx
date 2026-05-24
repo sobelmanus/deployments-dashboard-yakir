@@ -1,9 +1,11 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
+import clsx from 'clsx';
 import { useDeploymentsStore } from '@/store/deployments';
 import { patchDeployment } from '@/lib/api';
 import type { Deployment } from '@/types';
+import styles from './InlineEditCell.module.css';
 
 interface InlineEditCellProps {
   deployment: Deployment;
@@ -129,13 +131,15 @@ export default function InlineEditCell({
     commitRef.current?.();
   };
 
-  const cellClass = [
-    'px-2 py-1 rounded transition-colors min-h-[24px]',
-    status === 'saving' || status === 'success' ? 'bg-green-100 dark:bg-green-900/40' : '',
-    status === 'error' ? 'bg-red-100 dark:bg-red-900/40 animate-pulse' : '',
-  ]
-    .filter(Boolean)
-    .join(' ');
+  const isSavingOrSuccess = status === 'saving' || status === 'success';
+  const isError = status === 'error';
+
+  const cellClass = clsx(
+    styles.cell,
+    isSavingOrSuccess && styles.saving,
+    isError && styles.error,
+    isError && 'animate-pulse',
+  );
 
   if (editing) {
     return (
@@ -147,7 +151,7 @@ export default function InlineEditCell({
           onChange={(e) => setInputValue(e.target.value)}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
-          className="w-full outline-none bg-transparent text-sm"
+          className={styles.editInput}
         />
       </div>
     );
@@ -155,11 +159,11 @@ export default function InlineEditCell({
 
   return (
     <div
-      className={`${cellClass} cursor-pointer hover:bg-surface-hover truncate text-sm`}
+      className={clsx(cellClass, styles.viewCell)}
       onClick={activate}
       title={currentValue || undefined}
     >
-      {currentValue || <span className="text-text-muted italic">—</span>}
+      {currentValue || <span className={styles.emptyValue}>—</span>}
     </div>
   );
 }

@@ -1,0 +1,48 @@
+.cell {
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 150ms, color 150ms;
+  min-height: 24px;
+}
+
+.saving {
+  background: #dcfce7;
+}
+
+.error {
+  background: #fee2e2;
+}
+
+:global(.dark) .saving {
+  background: rgba(20, 83, 45, 0.4);
+}
+
+:global(.dark) .error {
+  background: rgba(127, 29, 29, 0.4);
+}
+
+.viewCell {
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+.viewCell:hover {
+  background-color: var(--color-surface-hover);
+}
+
+.emptyValue {
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.editInput {
+  width: 100%;
+  outline: none;
+  background: transparent;
+  border: none;
+  font-size: 14px;
+  color: var(--color-text-primary);
+}
