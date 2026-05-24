@@ -144,9 +144,7 @@ def get_deployment(deployment_id: str) -> DeploymentOut:
 
 @router.patch("/{deployment_id}", response_model=DeploymentOut)
 def patch_deployment(deployment_id: str, body: DeploymentPatch) -> DeploymentOut:
-    _get_or_404(deployment_id)  # 404 guard
-
-    updates = body.model_dump()  # validated keys only
+    updates = body.model_dump(exclude_unset=True)
     if not updates:
         raise HTTPException(status_code=422, detail="Request body must not be empty")
 
@@ -155,10 +153,12 @@ def patch_deployment(deployment_id: str, body: DeploymentPatch) -> DeploymentOut
 
     collection = get_deployments_collection()
     updated = collection.find_one_and_update(
-        {"deployment_id": deployment_id},
+        {"deployment_id": deployment_id, **_expiry_filter()},
         {"$set": set_doc},
         return_document=True,
     )
+    if updated is None:
+        raise HTTPException(status_code=404, detail="Deployment not found")
     return serialize_deployment(updated)
 
 
@@ -168,19 +168,18 @@ def patch_deployment(deployment_id: str, body: DeploymentPatch) -> DeploymentOut
 
 @router.put("/{deployment_id}", response_model=DeploymentOut)
 def put_deployment(deployment_id: str, body: DeploymentPut) -> DeploymentOut:
-    _get_or_404(deployment_id)  # 404 guard
+    # Register before the write so a crash between them doesn't leave orphaned keys
+    _register_custom_fields(list(body.attributes.keys()))
 
     now = datetime.now(timezone.utc)
     collection = get_deployments_collection()
     updated = collection.find_one_and_update(
-        {"deployment_id": deployment_id},
+        {"deployment_id": deployment_id, **_expiry_filter()},
         {"$set": {"attributes": body.attributes, "updated_at": now}},
         return_document=True,
     )
-
-    # Register new custom attribute keys
-    _register_custom_fields(list(body.attributes.keys()))
-
+    if updated is None:
+        raise HTTPException(status_code=404, detail="Deployment not found")
     return serialize_deployment(updated)
 
 
