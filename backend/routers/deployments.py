@@ -60,9 +60,9 @@ def _register_custom_fields(attribute_keys: list[str]) -> None:
 @router.get("", response_model=DeploymentListOut)
 def list_deployments(
     view: Annotated[Literal["existing", "deleted", "all"], Query()] = "existing",
-    status: Annotated[list[str], Query()] = Query(default=[]),
-    type: Annotated[list[str], Query()] = Query(default=[]),
-    environment: Annotated[list[str], Query()] = Query(default=[]),
+    status: Annotated[list[str], Query()] = [],
+    type: Annotated[list[str], Query()] = [],
+    environment: Annotated[list[str], Query()] = [],
     sort: Annotated[str, Query()] = "created_at",
     order: Annotated[str, Query()] = "desc",
     page: Annotated[int, Query(ge=1)] = 1,
