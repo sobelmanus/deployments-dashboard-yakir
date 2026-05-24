@@ -51,23 +51,21 @@ def create_indexes() -> None:
     collection = get_deployments_collection()
     existing = {idx["name"] for idx in collection.list_indexes()}
 
-    def _ensure(keys: list[tuple], **kwargs):
-        # Build a name to check existence
-        name = "_".join(f"{k}_{v}" for k, v in keys)
+    def _ensure(keys: list[tuple], name: str, **kwargs):
         if name not in existing:
-            collection.create_index(keys, **kwargs)
+            collection.create_index(keys, name=name, **kwargs)
 
-    _ensure([("deleted_at", ASCENDING), ("created_at", DESCENDING)])
-    _ensure([("type", ASCENDING)])
-    _ensure([("environment", ASCENDING)])
-    _ensure([("attributes.name", ASCENDING)])
-    _ensure([("attributes.description", ASCENDING)])
+    _ensure([("deleted_at", ASCENDING), ("created_at", DESCENDING)], name="deleted_at_1_created_at_-1")
+    _ensure([("type", ASCENDING)], name="type_1")
+    _ensure([("environment", ASCENDING)], name="environment_1")
+    _ensure([("attributes.name", ASCENDING)], name="attributes.name_1")
+    _ensure([("attributes.description", ASCENDING)], name="attributes.description_1")
 
 
 def seed_field_config() -> None:
     """Seed field_config collection if empty."""
     fc = get_field_config_collection()
-    if fc.count_documents({}) > 0:
+    if fc.find_one({}) is not None:
         return
 
     # Insert system fields in order
