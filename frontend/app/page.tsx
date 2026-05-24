@@ -32,7 +32,6 @@ export default function Home() {
 
   const prefetchAbortRef = useRef<AbortController | null>(null);
   const initializedRef = useRef(false);
-  const serverFetchAbortRef = useRef<AbortController | null>(null);
 
   // Full prefetch: fetch all pages sequentially
   const runFullPrefetch = useCallback(async () => {
@@ -84,37 +83,6 @@ export default function Home() {
     }
   }, [lastFetchedAt, mergeRawData, setLastFetchedAt]);
 
-  // Server fetch for filter changes during prefetch
-  const runServerFilterFetch = useCallback(
-    async (fs: FilterState) => {
-      if (serverFetchAbortRef.current) {
-        serverFetchAbortRef.current.abort();
-      }
-      const controller = new AbortController();
-      serverFetchAbortRef.current = controller;
-
-      try {
-        const res = await fetchDeployments({
-          page: 1,
-          limit: 100,
-          view: fs.view,
-          status: fs.status,
-          type: fs.type,
-          environment: fs.environment,
-          sort: fs.sort,
-          order: fs.order,
-        });
-        if (!controller.signal.aborted) {
-          // Only update viewData in-flight without replacing rawData
-          // We'll just merge these into rawData as partial data
-          mergeRawData(res.items);
-        }
-      } catch {
-        // ignore abort
-      }
-    },
-    [mergeRawData]
-  );
 
   // Initial setup
   useEffect(() => {
@@ -180,21 +148,6 @@ export default function Home() {
     return () => clearInterval(id);
   }, [prefetchComplete, runFullPrefetch]);
 
-  // When filter changes and prefetch is NOT complete: fire server request
-  const prevFilterRef = useRef<FilterState | null>(null);
-  useEffect(() => {
-    if (prefetchComplete) return;
-    if (!prevFilterRef.current) {
-      prevFilterRef.current = filterState;
-      return;
-    }
-    const prev = prevFilterRef.current;
-    // Check if filter actually changed
-    if (JSON.stringify(prev) !== JSON.stringify(filterState)) {
-      prevFilterRef.current = filterState;
-      runServerFilterFetch(filterState);
-    }
-  }, [filterState, prefetchComplete, runServerFilterFetch]);
 
   // Sync filter/panel changes to URL
   const prevSyncRef = useRef<{ fs: FilterState; panel: string | null } | null>(null);

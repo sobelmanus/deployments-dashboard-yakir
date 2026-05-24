@@ -28,6 +28,8 @@ export default function InlineEditCell({
   const originalValueRef = useRef(currentValue);
   // Use ref for the commit function to avoid stale-closure issues with blur
   const commitRef = useRef<() => Promise<void>>();
+  // Guards against double-commit: Enter/Tab fires commit(), which causes blur, which fires commitRef again
+  const committedRef = useRef(false);
 
   // Keep original value in sync when not editing
   useEffect(() => {
@@ -39,6 +41,7 @@ export default function InlineEditCell({
 
   const activate = (e: React.MouseEvent) => {
     e.stopPropagation(); // prevent row click from opening panel
+    committedRef.current = false;
     setEditing(true);
     setInputValue(currentValue);
     originalValueRef.current = currentValue;
@@ -46,7 +49,8 @@ export default function InlineEditCell({
   };
 
   const commit = useCallback(async () => {
-    if (!editing) return;
+    if (!editing || committedRef.current) return;
+    committedRef.current = true;
     setEditing(false);
     unregisterEdit(`${deployment.deployment_id}:${fieldPath}`);
 

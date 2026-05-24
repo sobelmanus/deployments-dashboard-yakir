@@ -26,11 +26,12 @@ export default function DeploymentsTable({ loading }: DeploymentsTableProps) {
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 50 });
   const [pageInputValue, setPageInputValue] = useState('1');
 
-  // Reset to first page whenever the filtered dataset changes
+  // Reset to first page only when the user actively changes filter/sort state,
+  // not on every background delta re-fetch (which produces a new viewData reference)
   useEffect(() => {
     setPagination((prev) => ({ ...prev, pageIndex: 0 }));
     setPageInputValue('1');
-  }, [viewData]);
+  }, [filterState]);
 
   const visibleCols = useMemo(() => colConfig.filter((c) => c.visible), [colConfig]);
 
