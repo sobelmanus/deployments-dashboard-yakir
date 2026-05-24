@@ -9,7 +9,7 @@ import DeleteToggle from './DeleteToggle';
 import styles from './Toolbar.module.css';
 
 // We expose columns via a context so the table can read them
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useMemo } from 'react';
 import type { ColumnConfig } from '@/types';
 
 interface ToolbarContextValue {
@@ -28,8 +28,9 @@ export function useColumns() {
 
 export function ToolbarProvider({ children }: { children: React.ReactNode }) {
   const [columns, setColumns] = useColumnConfig();
+  const value = useMemo(() => ({ columns, setColumns }), [columns, setColumns]);
   return (
-    <ToolbarContext.Provider value={{ columns, setColumns }}>
+    <ToolbarContext.Provider value={value}>
       {children}
     </ToolbarContext.Provider>
   );

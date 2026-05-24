@@ -12,6 +12,7 @@ frontend/.env.local
 
 # Project internals
 .claude/
+CLAUDE.md
 
 # Misc
 .DS_Store
