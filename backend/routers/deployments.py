@@ -80,7 +80,7 @@ def list_deployments(
         except ValueError:
             raise HTTPException(status_code=422, detail="Invalid updated_since format")
 
-        query: dict = {"updated_at": {"$gt": since_dt}}
+        query: dict = {"updated_at": {"$gt": since_dt}, **_expiry_filter()}
         docs = list(collection.find(query, {"_id": 0}))
         return DeploymentListOut(
             items=[serialize_deployment(d) for d in docs],
@@ -90,15 +90,14 @@ def list_deployments(
         )
 
     # ---- normal query ----
-    query = _expiry_filter()
-
-    # view filter
+    # Each view builds its own deleted_at filter to avoid key collisions with _expiry_filter()'s $or.
     if view == "existing":
-        query["deleted_at"] = None
+        query: dict = {"deleted_at": None}
     elif view == "deleted":
         cutoff = datetime.now(timezone.utc) - timedelta(hours=EXPIRY_HOURS)
-        query["deleted_at"] = {"$ne": None, "$gte": cutoff}
-    # view == "all" → only expiry filter already applied
+        query = {"deleted_at": {"$ne": None, "$gte": cutoff}}
+    else:  # "all"
+        query = _expiry_filter()
 
     # enum filters
     if status:
