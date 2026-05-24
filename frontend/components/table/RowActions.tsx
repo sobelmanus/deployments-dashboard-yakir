@@ -54,10 +54,10 @@ export default function RowActions({ deployment, isHovered, onInFlight }: RowAct
   return (
     <div className="relative flex items-center justify-end gap-2 min-w-[80px]">
       {error && (
-        <span className="text-xs text-red-500 mr-1">{error}</span>
+        <span className="text-xs text-red-500 dark:text-red-400 mr-1">{error}</span>
       )}
       {inFlight && (
-        <span className="text-xs text-gray-400 animate-pulse">…</span>
+        <span className="text-xs text-text-muted animate-pulse">…</span>
       )}
       {!inFlight && !error && isHovered && !isDeleted && !showConfirm && (
         <button

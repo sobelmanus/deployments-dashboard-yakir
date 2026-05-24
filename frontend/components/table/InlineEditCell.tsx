@@ -131,8 +131,8 @@ export default function InlineEditCell({
 
   const cellClass = [
     'px-2 py-1 rounded transition-colors min-h-[24px]',
-    status === 'saving' || status === 'success' ? 'bg-green-100' : '',
-    status === 'error' ? 'bg-red-100 animate-pulse' : '',
+    status === 'saving' || status === 'success' ? 'bg-green-100 dark:bg-green-900/40' : '',
+    status === 'error' ? 'bg-red-100 dark:bg-red-900/40 animate-pulse' : '',
   ]
     .filter(Boolean)
     .join(' ');
@@ -155,11 +155,11 @@ export default function InlineEditCell({
 
   return (
     <div
-      className={`${cellClass} cursor-pointer hover:bg-gray-100 truncate text-sm`}
+      className={`${cellClass} cursor-pointer hover:bg-surface-hover truncate text-sm`}
       onClick={activate}
       title={currentValue || undefined}
     >
-      {currentValue || <span className="text-gray-400 italic">—</span>}
+      {currentValue || <span className="text-text-muted italic">—</span>}
     </div>
   );
 }

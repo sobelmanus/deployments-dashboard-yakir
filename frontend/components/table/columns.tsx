@@ -5,15 +5,15 @@ import RowActions from './RowActions';
 import { getFieldValue } from '@/lib/utils';
 
 const STATUS_COLORS: Record<string, string> = {
-  active: 'bg-green-100 text-green-800',
-  failed: 'bg-red-100 text-red-800',
-  stopped: 'bg-gray-100 text-gray-700',
+  active: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
+  failed: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
+  stopped: 'bg-gray-100 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300',
 };
 
 const ENV_COLORS: Record<string, string> = {
-  production: 'bg-purple-100 text-purple-800',
-  staging: 'bg-yellow-100 text-yellow-800',
-  development: 'bg-blue-100 text-blue-800',
+  production: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
+  staging: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
+  development: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
 };
 
 export function buildColumns(
@@ -31,11 +31,11 @@ export function buildColumns(
       id: colConfig.path,
       header: () => (
         <button
-          className="flex items-center gap-1 text-left font-semibold text-xs uppercase tracking-wide text-gray-500 hover:text-gray-800"
+          className="flex items-center gap-1 text-left font-semibold text-xs uppercase tracking-wide text-text-secondary hover:text-text-primary"
           onClick={() => onSort(colConfig.path)}
         >
           {colConfig.label}
-          <span className="text-gray-400">
+          <span className="text-text-muted">
             {filterState.sort === colConfig.path
               ? filterState.order === 'asc'
                 ? ' ↑'
@@ -96,19 +96,19 @@ export function buildColumns(
         }
         if (colConfig.path === 'type') {
           return (
-            <span className="text-sm text-gray-700">{value.replace(/_/g, ' ')}</span>
+            <span className="text-sm text-text-secondary">{value.replace(/_/g, ' ')}</span>
           );
         }
         if (colConfig.path === 'created_at' || colConfig.path === 'updated_at') {
           return (
-            <span className="text-sm text-gray-600">
+            <span className="text-sm text-text-secondary">
               {value ? new Date(value).toLocaleString() : '—'}
             </span>
           );
         }
 
         return (
-          <span className="text-sm text-gray-700 truncate block max-w-xs">
+          <span className="text-sm text-text-secondary truncate block max-w-xs">
             {value || '—'}
           </span>
         );

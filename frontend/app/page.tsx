@@ -7,6 +7,7 @@ import { parseUrlState, pushFilterState } from '@/lib/url-state';
 import Toolbar, { ToolbarProvider } from '@/components/toolbar/Toolbar';
 import DeploymentsTable from '@/components/table/DeploymentsTable';
 import DetailPanel from '@/components/detail-panel/DetailPanel';
+import ThemeToggle from '@/components/ThemeToggle';
 import type { Deployment, FilterState } from '@/types';
 
 const DELTA_INTERVAL_MS = 15_000;
@@ -184,8 +185,9 @@ export default function Home() {
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
-      <header className="bg-white border-b border-gray-200 px-6 py-4">
-        <h1 className="text-xl font-semibold text-gray-900">Deployments Dashboard</h1>
+      <header className="bg-surface border-b border-border px-6 py-4 flex items-center justify-between flex-shrink-0">
+        <h1 className="text-xl font-semibold text-text-primary">Deployments Dashboard</h1>
+        <ThemeToggle />
       </header>
 
       <main className="flex-1 flex flex-col px-6 py-4 gap-3 min-h-0">
@@ -193,13 +195,13 @@ export default function Home() {
         <Toolbar />
 
         {!prefetchComplete && (
-          <div className="text-xs text-blue-600 bg-blue-50 border border-blue-200 rounded px-3 py-1.5">
+          <div className="text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded px-3 py-1.5">
             Loading full dataset for instant filtering…
           </div>
         )}
 
         {fetchError && (
-          <div className="flex items-center gap-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded px-3 py-2">
+          <div className="flex items-center gap-3 text-sm text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded px-3 py-2">
             <span className="flex-1">Error: {fetchError}</span>
             <button
               onClick={handleRetry}

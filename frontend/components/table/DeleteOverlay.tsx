@@ -29,12 +29,12 @@ export default function DeleteOverlay({ onConfirm, onCancel }: DeleteOverlayProp
   return (
     <div className="absolute inset-0 z-10 flex items-center justify-center">
       {/* semi-transparent backdrop over the row */}
-      <div className="absolute inset-0 bg-white/80 rounded" />
+      <div className="absolute inset-0 bg-surface/80 rounded" />
       <div
         ref={overlayRef}
-        className="relative z-10 flex items-center gap-3 px-4 py-2 bg-white border border-gray-300 rounded shadow-md text-sm"
+        className="relative z-10 flex items-center gap-3 px-4 py-2 bg-surface border border-border rounded shadow-md dark:shadow-black/40 text-sm"
       >
-        <span className="text-gray-700">Delete this deployment?</span>
+        <span className="text-text-primary">Delete this deployment?</span>
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -49,7 +49,7 @@ export default function DeleteOverlay({ onConfirm, onCancel }: DeleteOverlayProp
             e.stopPropagation();
             onCancel();
           }}
-          className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50 text-gray-700"
+          className="px-3 py-1 border border-border rounded hover:bg-surface-hover text-text-secondary"
         >
           Cancel
         </button>

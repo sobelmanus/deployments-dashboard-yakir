@@ -115,12 +115,12 @@ export default function AttributesSection({ deployment }: AttributesSectionProps
     return (
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
+          <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wide">
             Attributes
           </h3>
           <button
             onClick={handleEdit}
-            className="px-3 py-1 text-xs border border-gray-300 rounded hover:bg-gray-50 text-gray-700"
+            className="px-3 py-1 text-xs border border-border rounded hover:bg-surface-hover text-text-secondary"
           >
             Edit
           </button>
@@ -128,16 +128,16 @@ export default function AttributesSection({ deployment }: AttributesSectionProps
         <dl className="space-y-2">
           {SYSTEM_ATTR_KEYS.filter((k) => k in attrs).map((k) => (
             <div key={k} className="flex gap-3">
-              <dt className="w-28 flex-shrink-0 text-xs text-gray-500 capitalize">{k}</dt>
-              <dd className="text-sm text-gray-900 break-all">{attrs[k] || '—'}</dd>
+              <dt className="w-28 flex-shrink-0 text-xs text-text-secondary capitalize">{k}</dt>
+              <dd className="text-sm text-text-primary break-all">{attrs[k] || '—'}</dd>
             </div>
           ))}
           {Object.entries(attrs)
             .filter(([k]) => !SYSTEM_ATTR_KEYS.includes(k))
             .map(([k, v]) => (
               <div key={k} className="flex gap-3">
-                <dt className="w-28 flex-shrink-0 text-xs text-gray-500">{k}</dt>
-                <dd className="text-sm text-gray-900 break-all">{v || '—'}</dd>
+                <dt className="w-28 flex-shrink-0 text-xs text-text-secondary">{k}</dt>
+                <dd className="text-sm text-text-primary break-all">{v || '—'}</dd>
               </div>
             ))}
         </dl>
@@ -148,14 +148,14 @@ export default function AttributesSection({ deployment }: AttributesSectionProps
   return (
     <div>
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
+        <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wide">
           Attributes
         </h3>
         <div className="flex gap-2">
           <button
             onClick={handleCancel}
             disabled={saving}
-            className="px-3 py-1 text-xs border border-gray-300 rounded hover:bg-gray-50 text-gray-700 disabled:opacity-50"
+            className="px-3 py-1 text-xs border border-border rounded hover:bg-surface-hover text-text-secondary disabled:opacity-50"
           >
             Cancel
           </button>
@@ -170,7 +170,7 @@ export default function AttributesSection({ deployment }: AttributesSectionProps
       </div>
 
       {error && (
-        <div className="mb-3 text-xs text-red-600 bg-red-50 border border-red-200 rounded px-2 py-1.5">
+        <div className="mb-3 text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded px-2 py-1.5">
           {error}
         </div>
       )}
@@ -189,7 +189,7 @@ export default function AttributesSection({ deployment }: AttributesSectionProps
             >
               {/* Key */}
               {isSystemKey ? (
-                <span className="w-28 flex-shrink-0 text-xs text-gray-500 capitalize">{row.key}</span>
+                <span className="w-28 flex-shrink-0 text-xs text-text-secondary capitalize">{row.key}</span>
               ) : (
                 <div className="w-28 flex-shrink-0">
                   <input
@@ -198,9 +198,9 @@ export default function AttributesSection({ deployment }: AttributesSectionProps
                     value={row.key}
                     onChange={(e) => updateRow(idx, { key: e.target.value })}
                     disabled={row.markedForDeletion}
-                    className={`w-full text-xs border rounded px-2 py-1 outline-none ${
-                      keyErrors.has(idx) ? 'border-red-400 bg-red-50' : 'border-gray-300'
-                    } disabled:bg-gray-50 disabled:text-gray-400`}
+                    className={`w-full text-xs border rounded px-2 py-1 outline-none text-text-primary bg-surface ${
+                      keyErrors.has(idx) ? 'border-red-400 bg-red-50 dark:bg-red-900/20' : 'border-border'
+                    } disabled:bg-surface-hover disabled:text-text-muted`}
                     placeholder="key"
                   />
                   {keyErrors.has(idx) && (
@@ -211,14 +211,14 @@ export default function AttributesSection({ deployment }: AttributesSectionProps
 
               {/* Value */}
               {isRegion ? (
-                <span className="flex-1 text-sm text-gray-700">{row.value || '—'}</span>
+                <span className="flex-1 text-sm text-text-secondary">{row.value || '—'}</span>
               ) : (
                 <input
                   type="text"
                   value={row.value}
                   onChange={(e) => updateRow(idx, { value: e.target.value })}
                   disabled={row.markedForDeletion}
-                  className="flex-1 text-sm border border-gray-300 rounded px-2 py-1 outline-none focus:border-blue-400 disabled:bg-gray-50 disabled:text-gray-400"
+                  className="flex-1 text-sm border border-border rounded px-2 py-1 outline-none focus:border-blue-400 text-text-primary bg-surface disabled:bg-surface-hover disabled:text-text-muted"
                   placeholder="value"
                 />
               )}
@@ -228,7 +228,7 @@ export default function AttributesSection({ deployment }: AttributesSectionProps
                 <button
                   onClick={() => toggleDelete(idx)}
                   title={row.markedForDeletion ? 'Undo' : 'Mark for deletion'}
-                  className="text-gray-400 hover:text-red-500 text-sm leading-none"
+                  className="text-text-muted hover:text-red-500 text-sm leading-none"
                 >
                   {row.markedForDeletion ? '↩' : '×'}
                 </button>

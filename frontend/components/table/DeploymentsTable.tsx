@@ -77,15 +77,15 @@ export default function DeploymentsTable({ loading }: DeploymentsTableProps) {
 
   if (loading) {
     return (
-      <div className="bg-white border border-gray-200 rounded overflow-hidden">
+      <div className="bg-surface border border-border rounded overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-gray-200 bg-gray-50">
+            <tr className="border-b border-border bg-surface-alt">
               {['Name', 'Description', 'Version', 'Status', 'Type', 'Environment', ''].map(
                 (h, i) => (
                   <th
                     key={i}
-                    className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide"
+                    className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wide"
                   >
                     {h}
                   </th>
@@ -95,11 +95,11 @@ export default function DeploymentsTable({ loading }: DeploymentsTableProps) {
           </thead>
           <tbody>
             {Array.from({ length: SKELETON_ROWS }).map((_, i) => (
-              <tr key={i} className="border-b border-gray-100">
+              <tr key={i} className="border-b border-border-light">
                 {Array.from({ length: 7 }).map((_, j) => (
                   <td key={j} className="px-4 py-3">
                     <div
-                      className="h-4 bg-gray-200 rounded animate-pulse"
+                      className="h-4 bg-surface-hover rounded animate-pulse"
                       style={{ width: `${60 + ((i * 7 + j) % 3) * 15}%` }}
                     />
                   </td>
@@ -113,12 +113,12 @@ export default function DeploymentsTable({ loading }: DeploymentsTableProps) {
   }
 
   return (
-    <div className="h-full flex flex-col bg-white border border-gray-200 rounded overflow-hidden">
+    <div className="h-full flex flex-col bg-surface border border-border rounded overflow-hidden">
       <div className="flex-1 overflow-auto min-h-0">
         <table className="w-full text-sm border-collapse">
-          <thead className="sticky top-0 z-10 bg-gray-50">
+          <thead className="sticky top-0 z-10 bg-surface-alt">
             {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id} className="border-b border-gray-200">
+              <tr key={headerGroup.id} className="border-b border-border">
                 {headerGroup.headers.map((header) => (
                   <th key={header.id} className="px-4 py-3 text-left">
                     {header.isPlaceholder
@@ -134,7 +134,7 @@ export default function DeploymentsTable({ loading }: DeploymentsTableProps) {
               <tr>
                 <td
                   colSpan={columns.length}
-                  className="px-4 py-10 text-center text-gray-400"
+                  className="px-4 py-10 text-center text-text-muted"
                 >
                   No deployments found
                 </td>
@@ -148,12 +148,12 @@ export default function DeploymentsTable({ loading }: DeploymentsTableProps) {
                     key={row.id}
                     data-row-id={deployment.deployment_id}
                     className={[
-                      'border-b border-gray-100 relative cursor-pointer transition-colors',
+                      'border-b border-border-light relative cursor-pointer transition-colors',
                       isRowDeleted || isDeletedView ? 'opacity-50' : '',
                       deletingRowId === deployment.deployment_id ? 'opacity-50 animate-pulse' : '',
                       hoveredRowId === deployment.deployment_id
-                        ? 'bg-blue-50'
-                        : 'hover:bg-gray-50',
+                        ? 'bg-blue-50 dark:bg-blue-900/20'
+                        : 'hover:bg-surface-hover',
                     ]
                       .filter(Boolean)
                       .join(' ')}
@@ -184,17 +184,17 @@ export default function DeploymentsTable({ loading }: DeploymentsTableProps) {
       </div>
 
       {/* Pagination footer */}
-      <div className="flex items-center px-4 py-2 border-t border-gray-100 text-xs text-gray-600 gap-4">
+      <div className="flex items-center px-4 py-2 border-t border-border-light text-xs text-text-secondary gap-4">
         {/* Left: page size */}
         <div className="flex items-center gap-2 w-40">
-          <span className="text-gray-400 whitespace-nowrap">Rows per page:</span>
+          <span className="text-text-muted whitespace-nowrap">Rows per page:</span>
           <select
             value={pagination.pageSize}
             onChange={(e) => {
               setPagination({ pageIndex: 0, pageSize: Number(e.target.value) });
               setPageInputValue('1');
             }}
-            className="border border-gray-200 rounded px-2 py-1"
+            className="border border-border rounded px-2 py-1 text-text-primary bg-surface"
           >
             {[20, 50, 100].map((size) => (
               <option key={size} value={size}>{size}</option>
@@ -203,7 +203,7 @@ export default function DeploymentsTable({ loading }: DeploymentsTableProps) {
         </div>
 
         {/* Center: record count */}
-        <div className="flex-1 text-center text-gray-400">
+        <div className="flex-1 text-center text-text-muted">
           {viewData.length === 0 ? 'No results' : (() => {
             const from = pagination.pageIndex * pagination.pageSize + 1;
             const to = Math.min((pagination.pageIndex + 1) * pagination.pageSize, viewData.length);
@@ -214,9 +214,9 @@ export default function DeploymentsTable({ loading }: DeploymentsTableProps) {
         {/* Right: page navigation */}
         <div className="flex items-center gap-1 w-40 justify-end">
           <button onClick={() => goToPage(1)} disabled={currentPage === 1}
-            className="px-2 py-1 rounded disabled:opacity-30 hover:bg-gray-100" title="First page">{'<<'}</button>
+            className="px-2 py-1 rounded disabled:opacity-30 hover:bg-surface-hover" title="First page">{'<<'}</button>
           <button onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1}
-            className="px-2 py-1 rounded disabled:opacity-30 hover:bg-gray-100" title="Previous page">{'<'}</button>
+            className="px-2 py-1 rounded disabled:opacity-30 hover:bg-surface-hover" title="Previous page">{'<'}</button>
           <span className="flex items-center gap-1 px-1">
             <input
               type="number"
@@ -226,14 +226,14 @@ export default function DeploymentsTable({ loading }: DeploymentsTableProps) {
               onChange={(e) => setPageInputValue(e.target.value)}
               onBlur={() => goToPage(Number(pageInputValue))}
               onKeyDown={(e) => e.key === 'Enter' && goToPage(Number(pageInputValue))}
-              className="w-12 border border-gray-200 rounded px-1 py-0.5 text-center"
+              className="w-12 border border-border rounded px-1 py-0.5 text-center text-text-primary bg-surface"
             />
-            <span className="text-gray-400 whitespace-nowrap">of {pageCount}</span>
+            <span className="text-text-muted whitespace-nowrap">of {pageCount}</span>
           </span>
           <button onClick={() => goToPage(currentPage + 1)} disabled={currentPage === pageCount}
-            className="px-2 py-1 rounded disabled:opacity-30 hover:bg-gray-100" title="Next page">{'>'}</button>
+            className="px-2 py-1 rounded disabled:opacity-30 hover:bg-surface-hover" title="Next page">{'>'}</button>
           <button onClick={() => goToPage(pageCount)} disabled={currentPage === pageCount}
-            className="px-2 py-1 rounded disabled:opacity-30 hover:bg-gray-100" title="Last page">{'>>'}</button>
+            className="px-2 py-1 rounded disabled:opacity-30 hover:bg-surface-hover" title="Last page">{'>>'}</button>
         </div>
       </div>
     </div>

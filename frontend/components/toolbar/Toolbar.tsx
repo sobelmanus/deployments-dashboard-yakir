@@ -43,7 +43,7 @@ export default function Toolbar() {
   };
 
   return (
-    <div className="flex items-center gap-3 flex-wrap bg-white border border-gray-200 rounded px-3 py-2">
+    <div className="flex items-center gap-3 flex-wrap bg-surface border border-border rounded px-3 py-2">
       {/* Left: search chips */}
       <div className="flex-1 min-w-0">
         <SearchChips

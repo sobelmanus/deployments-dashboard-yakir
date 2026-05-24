@@ -2,18 +2,44 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  * {
-    box-sizing: border-box;
-  }
-  body {
-    @apply bg-gray-50 text-gray-900;
-  }
+/* ── Theme tokens ── */
+:root {
+  --color-bg:             #f9fafb;
+  --color-surface:        #ffffff;
+  --color-surface-alt:    #f9fafb;
+  --color-surface-hover:  #f3f4f6;
+  --color-surface-raised: #ffffff;
+  --color-border:         #e5e7eb;
+  --color-border-light:   #f3f4f6;
+  --color-text-primary:   #111827;
+  --color-text-secondary: #6b7280;
+  --color-text-muted:     #9ca3af;
+}
+
+.dark {
+  --color-bg:             #0f172a;
+  --color-surface:        #1e293b;
+  --color-surface-alt:    #1e293b;
+  --color-surface-hover:  #334155;
+  --color-surface-raised: #334155;
+  --color-border:         #334155;
+  --color-border-light:   #1e293b;
+  --color-text-primary:   #f1f5f9;
+  --color-text-secondary: #94a3b8;
+  --color-text-muted:     #64748b;
 }
 
 @keyframes slide-in {
   from { transform: translateX(100%); }
   to   { transform: translateX(0); }
+}
+
+@layer base {
+  * { box-sizing: border-box; }
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-text-primary);
+  }
 }
 
 @layer utilities {

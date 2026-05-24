@@ -162,12 +162,12 @@ export default function ColumnPicker({ columns, onChange }: ColumnPickerProps) {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="px-3 py-1.5 text-sm border border-gray-300 rounded text-gray-700 bg-white hover:bg-gray-50"
+        className="px-3 py-1.5 text-sm border border-border rounded text-text-secondary bg-surface hover:bg-surface-hover"
       >
         Columns ▾
       </button>
       {open && (
-        <div className="absolute top-full right-0 mt-1 w-64 bg-white border border-gray-200 rounded shadow-lg z-20">
+        <div className="absolute top-full right-0 mt-1 w-64 bg-surface-raised border border-border rounded shadow-lg dark:shadow-black/40 z-20">
           <Section
             title="System Columns"
             cols={systemCols}
@@ -184,10 +184,10 @@ export default function ColumnPicker({ columns, onChange }: ColumnPickerProps) {
               sensors={sensors}
             />
           )}
-          <div className="border-t border-gray-100 px-3 py-2">
+          <div className="border-t border-border-light px-3 py-2">
             <button
               onClick={resetToDefaults}
-              className="text-xs text-gray-500 hover:text-gray-700 underline"
+              className="text-xs text-text-muted hover:text-text-secondary underline"
             >
               Reset to defaults
             </button>
@@ -208,8 +208,8 @@ interface SectionProps {
 
 function Section({ title, cols, onToggle, onDragEnd, sensors }: SectionProps) {
   return (
-    <div className="border-b border-gray-100 last:border-0">
-      <div className="px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wide">
+    <div className="border-b border-border-light last:border-0">
+      <div className="px-3 py-2 text-xs font-semibold text-text-muted uppercase tracking-wide">
         {title}
       </div>
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
@@ -243,12 +243,12 @@ function SortableColumnRow({
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50"
+      className="flex items-center gap-2 px-3 py-2 hover:bg-surface-hover"
     >
       <span
         {...attributes}
         {...listeners}
-        className="text-gray-300 cursor-grab hover:text-gray-500 select-none"
+        className="text-text-muted cursor-grab hover:text-text-secondary select-none"
         title="Drag to reorder"
       >
         ⠿

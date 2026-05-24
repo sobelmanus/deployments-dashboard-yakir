@@ -44,18 +44,18 @@ export default function FilterDropdown({
         onClick={() => setOpen((o) => !o)}
         className={`px-3 py-1.5 text-sm border rounded flex items-center gap-1 ${
           selected.length > 0
-            ? 'border-blue-500 text-blue-700 bg-blue-50'
-            : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'
+            ? 'border-blue-500 text-blue-700 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400'
+            : 'border-border text-text-secondary bg-surface hover:bg-surface-hover'
         }`}
       >
         {displayLabel}
       </button>
       {open && (
-        <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-gray-200 rounded shadow-lg z-20">
+        <div className="absolute top-full left-0 mt-1 w-48 bg-surface-raised border border-border rounded shadow-lg dark:shadow-black/40 z-20">
           {options.map((opt) => (
             <label
               key={opt}
-              className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50 cursor-pointer"
+              className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-surface-hover cursor-pointer"
             >
               <input
                 type="checkbox"
@@ -67,10 +67,10 @@ export default function FilterDropdown({
             </label>
           ))}
           {selected.length > 0 && (
-            <div className="border-t border-gray-100 px-3 py-2">
+            <div className="border-t border-border-light px-3 py-2">
               <button
                 onClick={() => onChange([])}
-                className="text-xs text-gray-500 hover:text-gray-700"
+                className="text-xs text-text-secondary hover:text-text-primary"
               >
                 Clear
               </button>

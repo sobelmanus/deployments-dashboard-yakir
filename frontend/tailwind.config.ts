@@ -1,4 +1,4 @@
-import type { Config } from 'tailwindcss';
+import type { Config } from 'tailwindcss'
 
 const config: Config = {
   content: [
@@ -6,20 +6,23 @@ const config: Config = {
     './components/**/*.{js,ts,jsx,tsx,mdx}',
     './app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
+  darkMode: 'class',
   theme: {
     extend: {
-      keyframes: {
-        'slide-in': {
-          '0%': { transform: 'translateX(100%)' },
-          '100%': { transform: 'translateX(0)' },
-        },
-      },
-      animation: {
-        'slide-in': 'slide-in 0.2s ease-out',
+      colors: {
+        bg:                'var(--color-bg)',
+        surface:           'var(--color-surface)',
+        'surface-alt':     'var(--color-surface-alt)',
+        'surface-hover':   'var(--color-surface-hover)',
+        'surface-raised':  'var(--color-surface-raised)',
+        border:            'var(--color-border)',
+        'border-light':    'var(--color-border-light)',
+        'text-primary':    'var(--color-text-primary)',
+        'text-secondary':  'var(--color-text-secondary)',
+        'text-muted':      'var(--color-text-muted)',
       },
     },
   },
   plugins: [],
-};
-
-export default config;
+}
+export default config
