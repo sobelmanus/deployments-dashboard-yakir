@@ -44,6 +44,8 @@ class DeploymentPatch(BaseModel):
     @model_validator(mode="before")
     @classmethod
     def check_paths(cls, values: dict) -> dict:
+        if not values:
+            raise ValueError("Request body must not be empty")
         invalid = set(values.keys()) - ALLOWED_PATCH_PATHS
         if invalid:
             raise ValueError(
@@ -63,8 +65,8 @@ class DeploymentPut(BaseModel):
     @field_validator("attributes")
     @classmethod
     def no_blank_keys(cls, v: dict) -> dict:
-        if any(k == "" for k in v):
-            raise ValueError("Attribute keys must not be blank")
+        if any(not k.strip() for k in v):
+            raise ValueError("Attribute keys must not be blank or whitespace-only")
         return v
 
 
