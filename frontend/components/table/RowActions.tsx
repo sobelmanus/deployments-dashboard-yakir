@@ -7,6 +7,22 @@ import type { Deployment } from '@/types';
 import DeleteOverlay from './DeleteOverlay';
 import styles from './RowActions.module.css';
 
+const TrashIcon = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="3 6 5 6 21 6" />
+    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+    <path d="M10 11v6M14 11v6" />
+    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+  </svg>
+);
+
+const RestoreIcon = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+    <polyline points="3 3 3 8 8 8" />
+  </svg>
+);
+
 interface RowActionsProps {
   deployment: Deployment;
   isHovered: boolean;
@@ -54,34 +70,28 @@ export default function RowActions({ deployment, isHovered, onInFlight }: RowAct
 
   return (
     <div className={styles.wrapper}>
-      {error && (
-        <span className={styles.errorText}>{error}</span>
-      )}
-      {inFlight && (
-        <span className={`${styles.inFlight} animate-pulse`}>…</span>
-      )}
+      {error && <span className={styles.errorText} title={error}>!</span>}
+
       {!inFlight && !error && isHovered && !isDeleted && !showConfirm && (
         <button
-          onClick={(e) => {
-            e.stopPropagation();
-            setShowConfirm(true);
-          }}
+          onClick={(e) => { e.stopPropagation(); setShowConfirm(true); }}
           className={styles.deleteButton}
+          title="Delete"
         >
-          Delete
+          <TrashIcon />
         </button>
       )}
+
       {!inFlight && !error && isHovered && isDeleted && (
         <button
-          onClick={(e) => {
-            e.stopPropagation();
-            handleRestore();
-          }}
+          onClick={(e) => { e.stopPropagation(); handleRestore(); }}
           className={styles.restoreButton}
+          title="Restore"
         >
-          Restore
+          <RestoreIcon />
         </button>
       )}
+
       {showConfirm && (
         <DeleteOverlay onConfirm={handleDelete} onCancel={() => setShowConfirm(false)} />
       )}

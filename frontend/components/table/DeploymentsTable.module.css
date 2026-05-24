@@ -111,6 +111,34 @@
   border-radius: 4px;
 }
 
+/* Sticky action column */
+.stickyActionHeader {
+  position: sticky;
+  right: 0;
+  width: 44px;
+  min-width: 44px;
+  background-color: var(--color-surface-alt);
+  z-index: 1;
+}
+
+.stickyActionCell {
+  position: sticky;
+  right: 0;
+  width: 44px;
+  min-width: 44px;
+  padding: 0;
+  background-color: var(--color-surface);
+}
+
+/* Keep sticky cell background in sync with row hover states */
+.bodyRow:hover .stickyActionCell        { background-color: var(--color-surface-hover); }
+.rowHovered .stickyActionCell           { background-color: #eff6ff; }
+.rowDimmed .stickyActionCell            { background-color: var(--color-surface); }
+
+:global(.dark) .rowHovered .stickyActionCell {
+  background-color: rgba(30, 64, 175, 0.2);
+}
+
 /* Pagination footer */
 .footer {
   display: flex;

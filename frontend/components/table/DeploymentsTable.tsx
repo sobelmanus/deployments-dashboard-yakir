@@ -122,7 +122,10 @@ export default function DeploymentsTable({ loading }: DeploymentsTableProps) {
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id} className={styles.headerRow}>
                 {headerGroup.headers.map((header) => (
-                  <th key={header.id} className={styles.headerCell}>
+                  <th
+                    key={header.id}
+                    className={header.id === '__actions' ? styles.stickyActionHeader : styles.headerCell}
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(header.column.columnDef.header, header.getContext())}
@@ -165,7 +168,7 @@ export default function DeploymentsTable({ loading }: DeploymentsTableProps) {
                     {row.getVisibleCells().map((cell) => (
                       <td
                         key={cell.id}
-                        className={styles.cell}
+                        className={cell.column.id === '__actions' ? styles.stickyActionCell : styles.cell}
                         data-inline-edit={
                           cell.column.id === 'attributes.name' ||
                           cell.column.id === 'attributes.description'
