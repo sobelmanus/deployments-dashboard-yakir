@@ -1,39 +1,24 @@
-.overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(255, 255, 255, 0.8);
-  border-radius: 6px;
-}
-
-:global(.dark) .backdrop {
-  background: rgba(15, 23, 42, 0.8);
-}
-
+/* Floating popover anchored to the left of the action button */
 .dialog {
-  position: relative;
-  z-index: 10;
+  position: absolute;
+  right: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 20;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 8px 16px;
+  gap: 8px;
+  padding: 6px 10px;
+  white-space: nowrap;
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 6px;
-  box-shadow: 0 4px 6px -1px rgba(0,0,0,.1);
-  font-size: 14px;
+  box-shadow: 0 4px 12px rgba(0,0,0,.15);
+  font-size: 13px;
 }
 
 :global(.dark) .dialog {
-  box-shadow: 0 4px 6px -1px rgba(0,0,0,.4);
+  box-shadow: 0 4px 12px rgba(0,0,0,.5);
 }
 
 .question {
@@ -41,13 +26,14 @@
 }
 
 .confirmButton {
-  padding: 4px 12px;
+  padding: 3px 10px;
   background-color: #dc2626;
   color: #ffffff;
   border: none;
-  border-radius: 6px;
+  border-radius: 4px;
   cursor: pointer;
   font-weight: 500;
+  font-size: 12px;
   transition: background-color 150ms;
 }
 
@@ -56,12 +42,13 @@
 }
 
 .cancelButton {
-  padding: 4px 12px;
+  padding: 3px 10px;
   border: 1px solid var(--color-border);
-  border-radius: 6px;
+  border-radius: 4px;
   color: var(--color-text-secondary);
   background: none;
   cursor: pointer;
+  font-size: 12px;
   transition: background-color 150ms;
 }
 
