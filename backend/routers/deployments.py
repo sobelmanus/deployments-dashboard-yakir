@@ -15,10 +15,6 @@ router = APIRouter(prefix="/deployments", tags=["deployments"])
 
 EXPIRY_HOURS = 720  # 30 days
 
-ALLOWED_SORT_FIELDS = {
-    "created_at", "updated_at", "status", "type", "environment",
-    "attributes.name", "attributes.description",
-}
 
 
 def _expiry_filter() -> dict:
@@ -73,9 +69,6 @@ def list_deployments(
     limit: Annotated[int, Query(ge=1, le=200)] = 50,
     updated_since: Annotated[str | None, Query()] = None,
 ) -> DeploymentListOut:
-    if sort not in ALLOWED_SORT_FIELDS:
-        raise HTTPException(status_code=422, detail=f"Invalid sort field: {sort}")
-
     collection = get_deployments_collection()
 
     # ---- updated_since: delta re-fetch ----
