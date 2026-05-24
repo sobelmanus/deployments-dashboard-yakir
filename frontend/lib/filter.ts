@@ -1,22 +1,5 @@
 import type { Deployment, FilterState } from '@/types';
-
-function getFieldValue(deployment: Deployment, fieldPath: string): string {
-  if (fieldPath.startsWith('attributes.')) {
-    const key = fieldPath.slice('attributes.'.length);
-    return deployment.attributes[key] ?? '';
-  }
-  switch (fieldPath) {
-    case 'deployment_id': return deployment.deployment_id;
-    case 'version': return deployment.version;
-    case 'status': return deployment.status;
-    case 'type': return deployment.type;
-    case 'environment': return deployment.environment;
-    case 'created_by': return deployment.created_by;
-    case 'created_at': return deployment.created_at;
-    case 'updated_at': return deployment.updated_at;
-    default: return '';
-  }
-}
+import { getFieldValue } from './utils';
 
 function matchesChip(
   deployment: Deployment,

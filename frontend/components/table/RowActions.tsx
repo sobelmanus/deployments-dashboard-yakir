@@ -9,9 +9,10 @@ import DeleteOverlay from './DeleteOverlay';
 interface RowActionsProps {
   deployment: Deployment;
   isHovered: boolean;
+  onInFlight: (v: boolean) => void;
 }
 
-export default function RowActions({ deployment, isHovered }: RowActionsProps) {
+export default function RowActions({ deployment, isHovered, onInFlight }: RowActionsProps) {
   const { updateRecord } = useDeploymentsStore();
   const [showConfirm, setShowConfirm] = useState(false);
   const [inFlight, setInFlight] = useState(false);
@@ -21,6 +22,7 @@ export default function RowActions({ deployment, isHovered }: RowActionsProps) {
 
   const handleDelete = async () => {
     setShowConfirm(false);
+    onInFlight(true);
     setInFlight(true);
     setError(null);
     try {
@@ -30,10 +32,12 @@ export default function RowActions({ deployment, isHovered }: RowActionsProps) {
       setError(err instanceof Error ? err.message : 'Delete failed');
     } finally {
       setInFlight(false);
+      onInFlight(false);
     }
   };
 
   const handleRestore = async () => {
+    onInFlight(true);
     setInFlight(true);
     setError(null);
     try {
@@ -43,6 +47,7 @@ export default function RowActions({ deployment, isHovered }: RowActionsProps) {
       setError(err instanceof Error ? err.message : 'Restore failed');
     } finally {
       setInFlight(false);
+      onInFlight(false);
     }
   };
 

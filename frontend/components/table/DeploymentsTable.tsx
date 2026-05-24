@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useContext, useMemo, useEffect } from 'react';
+import { useState, useContext, useMemo, useEffect, useCallback } from 'react';
 import {
   useReactTable,
   getCoreRowModel,
@@ -23,6 +23,7 @@ export default function DeploymentsTable({ loading }: DeploymentsTableProps) {
   const { columns: colConfig } = useContext(ToolbarContext);
 
   const [hoveredRowId, setHoveredRowId] = useState<string | null>(null);
+  const [deletingRowId, setDeletingRowId] = useState<string | null>(null);
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 50 });
   const [pageInputValue, setPageInputValue] = useState('1');
 
@@ -35,22 +36,21 @@ export default function DeploymentsTable({ loading }: DeploymentsTableProps) {
 
   const visibleCols = useMemo(() => colConfig.filter((c) => c.visible), [colConfig]);
 
-  const handleSort = (field: string) => {
+  const handleSort = useCallback((field: string) => {
     if (filterState.sort === field) {
       setFilterState({ ...filterState, order: filterState.order === 'asc' ? 'desc' : 'asc' });
     } else {
       setFilterState({ ...filterState, sort: field, order: 'asc' });
     }
-  };
+  }, [filterState, setFilterState]);
 
   const handleRowClick = (id: string) => {
     setOpenPanelId(id);
   };
 
   const columns = useMemo(
-    () => buildColumns(visibleCols, hoveredRowId, filterState, handleSort),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [visibleCols, hoveredRowId, filterState]
+    () => buildColumns(visibleCols, hoveredRowId, filterState, handleSort, setDeletingRowId),
+    [visibleCols, hoveredRowId, filterState, handleSort]
   );
 
   const table = useReactTable({
@@ -150,6 +150,7 @@ export default function DeploymentsTable({ loading }: DeploymentsTableProps) {
                     className={[
                       'border-b border-gray-100 relative cursor-pointer transition-colors',
                       isRowDeleted || isDeletedView ? 'opacity-50' : '',
+                      deletingRowId === deployment.deployment_id ? 'opacity-50 animate-pulse' : '',
                       hoveredRowId === deployment.deployment_id
                         ? 'bg-blue-50'
                         : 'hover:bg-gray-50',

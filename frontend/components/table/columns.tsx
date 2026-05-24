@@ -2,24 +2,7 @@ import type { ColumnDef } from '@tanstack/react-table';
 import type { Deployment, ColumnConfig } from '@/types';
 import InlineEditCell from './InlineEditCell';
 import RowActions from './RowActions';
-
-function getFieldValue(deployment: Deployment, path: string): string {
-  if (path.startsWith('attributes.')) {
-    const key = path.slice('attributes.'.length);
-    return deployment.attributes[key] ?? '';
-  }
-  switch (path) {
-    case 'deployment_id': return deployment.deployment_id;
-    case 'version': return deployment.version;
-    case 'status': return deployment.status;
-    case 'type': return deployment.type;
-    case 'environment': return deployment.environment;
-    case 'created_by': return deployment.created_by;
-    case 'created_at': return deployment.created_at;
-    case 'updated_at': return deployment.updated_at;
-    default: return '';
-  }
-}
+import { getFieldValue } from '@/lib/utils';
 
 const STATUS_COLORS: Record<string, string> = {
   active: 'bg-green-100 text-green-800',
@@ -38,6 +21,7 @@ export function buildColumns(
   hoveredRowId: string | null,
   filterState: { sort: string; order: 'asc' | 'desc' },
   onSort: (field: string) => void,
+  onInFlight: (deploymentId: string | null) => void,
 ): ColumnDef<Deployment>[] {
   const cols: ColumnDef<Deployment>[] = visibleCols.map((colConfig) => {
     const isInlineEdit =
@@ -118,7 +102,7 @@ export function buildColumns(
         if (colConfig.path === 'created_at' || colConfig.path === 'updated_at') {
           return (
             <span className="text-sm text-gray-600">
-              {value ? new Date(value).toLocaleDateString() : '—'}
+              {value ? new Date(value).toLocaleString() : '—'}
             </span>
           );
         }
@@ -143,6 +127,7 @@ export function buildColumns(
         <RowActions
           deployment={deployment}
           isHovered={hoveredRowId === deployment.deployment_id}
+          onInFlight={(v) => onInFlight(v ? deployment.deployment_id : null)}
         />
       );
     },

@@ -18,7 +18,7 @@ export async function fetchDeployments(
   params: FetchDeploymentsParams = {}
 ): Promise<PaginatedResponse> {
   const qs = new URLSearchParams();
-  if (params.page) qs.set('page', String(params.page));
+  if (params.page != null) qs.set('page', String(params.page));
   if (params.limit) qs.set('limit', String(params.limit));
   if (params.view) qs.set('view', params.view);
   if (params.sort) qs.set('sort', params.sort);

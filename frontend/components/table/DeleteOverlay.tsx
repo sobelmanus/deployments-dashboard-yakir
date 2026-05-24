@@ -19,7 +19,7 @@ export default function DeleteOverlay({ onConfirm, onCancel }: DeleteOverlayProp
     // Small delay to avoid the mousedown that opened this
     const id = setTimeout(() => {
       document.addEventListener('mousedown', handler);
-    }, 50);
+    }, 0);
     return () => {
       clearTimeout(id);
       document.removeEventListener('mousedown', handler);
