@@ -104,7 +104,6 @@ export default function Home() {
       .catch((err) => console.error('field-config fetch failed:', err));
 
     // Bootstrap fetch: page 1 with URL filters applied server-side for fast first paint.
-    // Note: search chips are client-side only and cannot be forwarded to the server.
     const doBootstrap = async () => {
       try {
         const res = await fetchDeployments({
@@ -114,6 +113,7 @@ export default function Home() {
           status: urlFilter.status,
           type: urlFilter.type,
           environment: urlFilter.environment,
+          chips: urlFilter.chips,
           sort: urlFilter.sort,
           order: urlFilter.order,
         });

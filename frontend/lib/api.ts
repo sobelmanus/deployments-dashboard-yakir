@@ -9,6 +9,7 @@ export interface FetchDeploymentsParams {
   status?: string[];
   type?: string[];
   environment?: string[];
+  chips?: Array<{ field: string; value: string }>;
   sort?: string;
   order?: 'asc' | 'desc';
   updated_since?: string;
@@ -27,6 +28,7 @@ export async function fetchDeployments(
   params.status?.forEach((s) => qs.append('status', s));
   params.type?.forEach((t) => qs.append('type', t));
   params.environment?.forEach((e) => qs.append('environment', e));
+  params.chips?.forEach((c) => { if (c.value) qs.append('search', `${c.field}:${c.value}`); });
 
   const res = await fetch(`${API_BASE}/deployments?${qs.toString()}`);
   if (!res.ok) throw new Error(`Failed to fetch deployments: ${res.status}`);

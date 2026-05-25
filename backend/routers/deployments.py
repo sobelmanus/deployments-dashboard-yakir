@@ -1,3 +1,4 @@
+import re
 from datetime import datetime, timedelta, timezone
 from typing import Annotated, Literal
 
@@ -63,6 +64,7 @@ def list_deployments(
     status: Annotated[list[str], Query()] = [],
     type: Annotated[list[str], Query()] = [],
     environment: Annotated[list[str], Query()] = [],
+    search: Annotated[list[str], Query()] = [],
     sort: Annotated[str, Query()] = "created_at",
     order: Annotated[str, Query()] = "desc",
     page: Annotated[int, Query(ge=1)] = 1,
@@ -104,6 +106,34 @@ def list_deployments(
         query["type"] = {"$in": type}
     if environment:
         query["environment"] = {"$in": environment}
+
+    # search chips
+    if search:
+        fc = get_field_config_collection()
+        attr_paths = [
+            doc["path"]
+            for doc in fc.find({"path": {"$regex": r"^attributes\."}}, {"path": 1, "_id": 0})
+        ]
+        chip_conditions = []
+        for raw in search:
+            colon_idx = raw.find(":")
+            field = raw[:colon_idx] if colon_idx != -1 else "all"
+            value = raw[colon_idx + 1:] if colon_idx != -1 else raw
+            if not value:
+                continue
+            pattern = {"$regex": re.escape(value), "$options": "i"}
+            if field == "all":
+                clauses = [
+                    {"deployment_id": pattern},
+                    {"created_by": pattern},
+                    {"version": pattern},
+                    *[{path: pattern} for path in attr_paths],
+                ]
+                chip_conditions.append({"$or": clauses})
+            else:
+                chip_conditions.append({field: pattern})
+        if chip_conditions:
+            query["$and"] = chip_conditions
 
     # sort
     sort_dir = 1 if order == "asc" else -1

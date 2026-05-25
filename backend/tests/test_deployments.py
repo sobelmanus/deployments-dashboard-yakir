@@ -248,6 +248,68 @@ class TestListDeployments:
         assert resp.status_code == 200
         assert len(resp.json()["items"]) == 3
 
+    def test_search_specific_field_matches(self, client, deps_col):
+        _insert(deps_col, {}, {"deployment_id": "dep-002", "attributes": {"name": "other-app"}})
+        resp = client.get("/deployments?search=attributes.name:my-app")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["total"] == 1
+        assert data["items"][0]["deployment_id"] == "dep-001"
+
+    def test_search_specific_field_no_match_returns_empty(self, client, deps_col):
+        _insert(deps_col, {})
+        resp = client.get("/deployments?search=attributes.name:nonexistent")
+        assert resp.status_code == 200
+        assert resp.json()["total"] == 0
+
+    def test_search_specific_field_case_insensitive(self, client, deps_col):
+        _insert(deps_col, {})
+        resp = client.get("/deployments?search=attributes.name:MY-APP")
+        assert resp.status_code == 200
+        assert resp.json()["total"] == 1
+
+    def test_search_all_matches_created_by(self, client, deps_col):
+        _insert(deps_col, {}, {"deployment_id": "dep-002", "created_by": "bob"})
+        resp = client.get("/deployments?search=all:alice")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["total"] == 1
+        assert data["items"][0]["deployment_id"] == "dep-001"
+
+    def test_search_all_matches_attribute_value(self, client, deps_col):
+        _insert(deps_col, {}, {"deployment_id": "dep-002", "attributes": {"name": "other"}})
+        resp = client.get("/deployments?search=all:my-app")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["total"] == 1
+        assert data["items"][0]["deployment_id"] == "dep-001"
+
+    def test_search_all_matches_deployment_id(self, client, deps_col):
+        _insert(deps_col, {}, {"deployment_id": "dep-002"})
+        resp = client.get("/deployments?search=all:dep-001")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["total"] == 1
+        assert data["items"][0]["deployment_id"] == "dep-001"
+
+    def test_search_multiple_chips_are_anded(self, client, deps_col):
+        _insert(
+            deps_col,
+            {"created_by": "alice", "attributes": {"name": "my-app"}},
+            {"deployment_id": "dep-002", "created_by": "alice", "attributes": {"name": "other"}},
+        )
+        resp = client.get("/deployments?search=all:alice&search=attributes.name:my-app")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["total"] == 1
+        assert data["items"][0]["deployment_id"] == "dep-001"
+
+    def test_search_chip_no_match_in_and_returns_empty(self, client, deps_col):
+        _insert(deps_col, {})
+        resp = client.get("/deployments?search=all:alice&search=attributes.name:nonexistent")
+        assert resp.status_code == 200
+        assert resp.json()["total"] == 0
+
 
 # ---------------------------------------------------------------------------
 # GET /deployments/{id}
