@@ -95,14 +95,35 @@ export function useColumnConfig(): [ColumnConfig[], (cols: ColumnConfig[]) => vo
   const fieldConfig = useDeploymentsStore((s) => s.fieldConfig);
   const [columns, setColumnsState] = useState<ColumnConfig[]>([]);
   const initializedRef = useRef(false);
+  const customMergedRef = useRef(false);
 
+  // Initialize with system columns immediately on mount (no fieldConfig dependency)
   useEffect(() => {
-    // Initialise exactly once, but wait until fieldConfig is loaded so
-    // custom attribute columns are included in the first (and only) init.
-    if (initializedRef.current || !fieldConfig) return;
+    if (initializedRef.current) return;
     initializedRef.current = true;
+    setColumnsState(loadFromStorage([]));
+  }, []);
+
+  // Merge custom columns once fieldConfig is available
+  useEffect(() => {
+    if (customMergedRef.current || !fieldConfig) return;
+    customMergedRef.current = true;
     const customPaths = fieldConfig.custom.map((f) => f.path);
-    setColumnsState(loadFromStorage(customPaths));
+    if (customPaths.length === 0) return;
+    setColumnsState((prev) => {
+      const existingPaths = new Set(prev.map((c) => c.path));
+      const newCustom = customPaths
+        .filter((p) => !existingPaths.has(p))
+        .map((p) => {
+          const key = p.startsWith('attributes.') ? p.slice('attributes.'.length) : p;
+          const label = key
+            .split('_')
+            .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+            .join(' ');
+          return { path: p, label, visible: false, section: 'custom' as const };
+        });
+      return newCustom.length > 0 ? [...prev, ...newCustom] : prev;
+    });
   }, [fieldConfig]);
 
   const setColumns = useCallback((cols: ColumnConfig[]) => {
