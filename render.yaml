@@ -9,10 +9,7 @@ services:
       - key: DB_NAME
         value: deployments
       - key: CORS_ORIGINS
-        fromService:
-          name: deployments-frontend
-          type: web
-          property: host
+        value: https://deployments-frontend.onrender.com
 
   - type: web
     name: deployments-frontend
@@ -20,9 +17,6 @@ services:
     rootDir: frontend
     envVars:
       - key: BACKEND_URL
-        fromService:
-          name: deployments-backend
-          type: web
-          property: host
+        value: https://deployments-backend-iyep.onrender.com
       - key: NODE_ENV
         value: production
