@@ -169,22 +169,24 @@ export default function ColumnPicker({ columns, onChange }: ColumnPickerProps) {
       </button>
       {open && (
         <div className={styles.dropdown}>
-          <Section
-            title="System Columns"
-            cols={systemCols}
-            onToggle={toggleVisible}
-            onDragEnd={(e) => handleDragEnd(e, 'system')}
-            sensors={sensors}
-          />
-          {customCols.length > 0 && (
+          <div className={styles.scrollableSections}>
             <Section
-              title="Custom Columns"
-              cols={customCols}
+              title="System Columns"
+              cols={systemCols}
               onToggle={toggleVisible}
-              onDragEnd={(e) => handleDragEnd(e, 'custom')}
+              onDragEnd={(e) => handleDragEnd(e, 'system')}
               sensors={sensors}
             />
-          )}
+            {customCols.length > 0 && (
+              <Section
+                title="Custom Columns"
+                cols={customCols}
+                onToggle={toggleVisible}
+                onDragEnd={(e) => handleDragEnd(e, 'custom')}
+                sensors={sensors}
+              />
+            )}
+          </div>
           <div className={styles.footerRow}>
             <button
               onClick={resetToDefaults}
