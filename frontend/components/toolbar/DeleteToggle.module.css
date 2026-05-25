@@ -7,7 +7,7 @@
 }
 
 .option {
-  padding: 6px 12px;
+  padding: 4px 10px;
   background-color: var(--color-surface);
   color: var(--color-text-secondary);
   border: none;
