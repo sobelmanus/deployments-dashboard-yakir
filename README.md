@@ -1,5 +1,7 @@
 # Deployments Dashboard
 
+> **Reviewer?** See [TO_THE_REVIEWER.md](./TO_THE_REVIEWER.md) for setup instructions, design decisions, and trade-offs.
+
 ## Background
 
 You're building an internal dashboard for a platform team. The system manages deployment records — each deployment has metadata and user-defined key-value attributes (like tags or labels). The platform has thousands of deployments across multiple teams.
