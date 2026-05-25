@@ -24,7 +24,6 @@ export default function DeploymentsTable({ loading }: DeploymentsTableProps) {
   const { viewData, filterState, setFilterState, setOpenPanelId } = useDeploymentsStore();
   const { columns: colConfig } = useContext(ToolbarContext);
 
-  const [hoveredRowId, setHoveredRowId] = useState<string | null>(null);
   const [deletingRowId, setDeletingRowId] = useState<string | null>(null);
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 50 });
   const [pageInputValue, setPageInputValue] = useState('1');
@@ -51,8 +50,8 @@ export default function DeploymentsTable({ loading }: DeploymentsTableProps) {
   };
 
   const columns = useMemo(
-    () => buildColumns(visibleCols, hoveredRowId, filterState, handleSort, setDeletingRowId),
-    [visibleCols, hoveredRowId, filterState, handleSort]
+    () => buildColumns(visibleCols, filterState, handleSort, setDeletingRowId),
+    [visibleCols, filterState, handleSort]
   );
 
   const table = useReactTable({
@@ -149,7 +148,6 @@ export default function DeploymentsTable({ loading }: DeploymentsTableProps) {
                 const deployment = row.original as Deployment;
                 const isRowDeleted = deployment.deleted_at !== null;
                 const isDeleting = deletingRowId === deployment.deployment_id;
-                const isHovered = hoveredRowId === deployment.deployment_id;
                 return (
                   <tr
                     key={row.id}
@@ -159,10 +157,7 @@ export default function DeploymentsTable({ loading }: DeploymentsTableProps) {
                       (isRowDeleted || isDeletedView) && styles.rowDimmed,
                       isDeleting && styles.rowDeleting,
                       isDeleting && 'animate-pulse',
-                      isHovered && styles.rowHovered,
                     )}
-                    onMouseEnter={() => setHoveredRowId(deployment.deployment_id)}
-                    onMouseLeave={() => setHoveredRowId(null)}
                     onClick={() => handleRowClick(deployment.deployment_id)}
                   >
                     {row.getVisibleCells().map((cell) => (

@@ -25,11 +25,10 @@ const RestoreIcon = () => (
 
 interface RowActionsProps {
   deployment: Deployment;
-  isHovered: boolean;
   onInFlight: (v: boolean) => void;
 }
 
-export default function RowActions({ deployment, isHovered, onInFlight }: RowActionsProps) {
+export default function RowActions({ deployment, onInFlight }: RowActionsProps) {
   const { updateRecord } = useDeploymentsStore();
   const [showConfirm, setShowConfirm] = useState(false);
   const [inFlight, setInFlight] = useState(false);
@@ -72,7 +71,7 @@ export default function RowActions({ deployment, isHovered, onInFlight }: RowAct
     <div className={styles.wrapper}>
       {error && <span className={styles.errorText} title={error}>!</span>}
 
-      {!inFlight && !error && isHovered && !isDeleted && !showConfirm && (
+      {!inFlight && !error && !isDeleted && !showConfirm && (
         <button
           onClick={(e) => { e.stopPropagation(); setShowConfirm(true); }}
           className={styles.deleteButton}
@@ -82,7 +81,7 @@ export default function RowActions({ deployment, isHovered, onInFlight }: RowAct
         </button>
       )}
 
-      {!inFlight && !error && isHovered && isDeleted && (
+      {!inFlight && !error && isDeleted && (
         <button
           onClick={(e) => { e.stopPropagation(); handleRestore(); }}
           className={styles.restoreButton}

@@ -18,6 +18,17 @@
   color: #f87171;
 }
 
+/* Hidden by default; revealed when the parent row is hovered */
+.deleteButton,
+.restoreButton {
+  visibility: hidden;
+}
+
+tr:hover .deleteButton,
+tr:hover .restoreButton {
+  visibility: visible;
+}
+
 /* Shared icon button base */
 .deleteButton,
 .restoreButton {

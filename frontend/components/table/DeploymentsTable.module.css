@@ -48,14 +48,6 @@
   background-color: var(--color-surface-hover);
 }
 
-.rowHovered {
-  background-color: #eff6ff;
-}
-
-:global(.dark) .rowHovered {
-  background-color: rgba(30, 64, 175, 0.2);
-}
-
 .rowDimmed {
   opacity: 0.5;
 }
@@ -132,12 +124,7 @@
 
 /* Keep sticky cell background in sync with row hover states */
 .bodyRow:hover .stickyActionCell        { background-color: var(--color-surface-hover); }
-.rowHovered .stickyActionCell           { background-color: #eff6ff; }
 .rowDimmed .stickyActionCell            { background-color: var(--color-surface); }
-
-:global(.dark) .rowHovered .stickyActionCell {
-  background-color: rgba(30, 64, 175, 0.2);
-}
 
 /* Pagination footer */
 .footer {

@@ -7,7 +7,6 @@ import badgeStyles from './Badge.module.css';
 
 export function buildColumns(
   visibleCols: ColumnConfig[],
-  hoveredRowId: string | null,
   filterState: { sort: string; order: 'asc' | 'desc' },
   onSort: (field: string) => void,
   onInFlight: (deploymentId: string | null) => void,
@@ -127,7 +126,6 @@ export function buildColumns(
       return (
         <RowActions
           deployment={deployment}
-          isHovered={hoveredRowId === deployment.deployment_id}
           onInFlight={(v) => onInFlight(v ? deployment.deployment_id : null)}
         />
       );
