@@ -30,7 +30,7 @@
 }
 
 .viewCell:hover {
-  background-color: var(--color-surface-hover);
+  background-color: var(--color-cell-editable-hover);
 }
 
 .emptyValue {
