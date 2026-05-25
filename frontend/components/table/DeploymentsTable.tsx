@@ -11,6 +11,7 @@ import clsx from 'clsx';
 import { useDeploymentsStore } from '@/store/deployments';
 import { ToolbarContext } from '@/components/toolbar/Toolbar';
 import { buildColumns } from './columns';
+import PaginationFooter from './PaginationFooter';
 import type { Deployment } from '@/types';
 import styles from './DeploymentsTable.module.css';
 
@@ -26,13 +27,11 @@ export default function DeploymentsTable({ loading }: DeploymentsTableProps) {
 
   const [deletingRowId, setDeletingRowId] = useState<string | null>(null);
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 50 });
-  const [pageInputValue, setPageInputValue] = useState('1');
 
   // Reset to first page only when the user actively changes filter/sort state,
   // not on every background delta re-fetch (which produces a new viewData reference)
   useEffect(() => {
     setPagination((prev) => ({ ...prev, pageIndex: 0 }));
-    setPageInputValue('1');
   }, [filterState]);
 
   const visibleCols = useMemo(() => colConfig.filter((c) => c.visible), [colConfig]);
@@ -66,14 +65,6 @@ export default function DeploymentsTable({ loading }: DeploymentsTableProps) {
   });
 
   const pageCount = table.getPageCount();
-  const currentPage = pagination.pageIndex + 1;
-
-  const goToPage = (page: number) => {
-    const clamped = Math.max(1, Math.min(page, pageCount));
-    setPagination((prev) => ({ ...prev, pageIndex: clamped - 1 }));
-    setPageInputValue(String(clamped));
-  };
-
   const isDeletedView = filterState.view === 'deleted';
 
   if (loading) {
@@ -182,59 +173,12 @@ export default function DeploymentsTable({ loading }: DeploymentsTableProps) {
         </table>
       </div>
 
-      {/* Pagination footer */}
-      <div className={styles.footer}>
-        {/* Left: page size */}
-        <div className={styles.footerLeft}>
-          <span className={styles.footerMuted}>Rows per page:</span>
-          <select
-            value={pagination.pageSize}
-            onChange={(e) => {
-              setPagination({ pageIndex: 0, pageSize: Number(e.target.value) });
-              setPageInputValue('1');
-            }}
-            className={styles.pageSizeSelect}
-          >
-            {[20, 50, 100].map((size) => (
-              <option key={size} value={size}>{size}</option>
-            ))}
-          </select>
-        </div>
-
-        {/* Center: record count */}
-        <div className={styles.footerCenter}>
-          {viewData.length === 0 ? 'No results' : (() => {
-            const from = pagination.pageIndex * pagination.pageSize + 1;
-            const to = Math.min((pagination.pageIndex + 1) * pagination.pageSize, viewData.length);
-            return `Displaying ${from}–${to} of ${viewData.length} results`;
-          })()}
-        </div>
-
-        {/* Right: page navigation */}
-        <div className={styles.footerRight}>
-          <button onClick={() => goToPage(1)} disabled={currentPage === 1}
-            className={styles.pageButton} title="First page">{'<<'}</button>
-          <button onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1}
-            className={styles.pageButton} title="Previous page">{'<'}</button>
-          <span className={styles.pageInputWrapper}>
-            <input
-              type="number"
-              min={1}
-              max={pageCount}
-              value={pageInputValue}
-              onChange={(e) => setPageInputValue(e.target.value)}
-              onBlur={() => goToPage(Number(pageInputValue))}
-              onKeyDown={(e) => e.key === 'Enter' && goToPage(Number(pageInputValue))}
-              className={styles.pageInput}
-            />
-            <span className={styles.footerMuted}>of {pageCount}</span>
-          </span>
-          <button onClick={() => goToPage(currentPage + 1)} disabled={currentPage === pageCount}
-            className={styles.pageButton} title="Next page">{'>'}</button>
-          <button onClick={() => goToPage(pageCount)} disabled={currentPage === pageCount}
-            className={styles.pageButton} title="Last page">{'>>'}</button>
-        </div>
-      </div>
+      <PaginationFooter
+        total={viewData.length}
+        pageCount={pageCount}
+        pagination={pagination}
+        setPagination={setPagination}
+      />
     </div>
   );
 }
