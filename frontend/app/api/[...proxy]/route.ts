@@ -22,9 +22,19 @@ async function proxy(
   }
 
   const upstream = await fetch(target, init);
+
+  // Node's fetch() auto-decompresses gzip/br bodies, so forwarding the
+  // original content-encoding and content-length headers would tell the
+  // browser the body is still compressed (and the wrong size). Strip them
+  // so the browser reads the decompressed stream until EOF.
+  const responseHeaders = new Headers(upstream.headers);
+  responseHeaders.delete('content-encoding');
+  responseHeaders.delete('content-length');
+  responseHeaders.delete('transfer-encoding');
+
   return new NextResponse(upstream.body, {
     status: upstream.status,
-    headers: upstream.headers,
+    headers: responseHeaders,
   });
 }
 
