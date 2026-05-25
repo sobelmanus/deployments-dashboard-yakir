@@ -50,12 +50,13 @@ export function applyFilters(
     result = result.filter((d) => matchesChip(d, chip));
   }
 
-  // Sort
+  // Sort — tiebreak by deployment_id to match backend's stable ordering
   result = [...result].sort((a, b) => {
     const aVal = getFieldValue(a, filterState.sort);
     const bVal = getFieldValue(b, filterState.sort);
     const cmp = aVal.localeCompare(bVal);
-    return filterState.order === 'asc' ? cmp : -cmp;
+    if (cmp !== 0) return filterState.order === 'asc' ? cmp : -cmp;
+    return a.deployment_id.localeCompare(b.deployment_id);
   });
 
   return result;

@@ -146,7 +146,7 @@ def list_deployments(
     skip = (page - 1) * limit
     cursor = (
         collection.find(query, {"_id": 0})
-        .sort(sort, sort_dir)
+        .sort([(sort, sort_dir), ("deployment_id", 1)])
         .skip(skip)
         .limit(limit)
     )
