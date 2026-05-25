@@ -1,85 +1,55 @@
 # To The Reviewer
 
-This document summarises the key design decisions made before implementation. Each section explains the choice and the reasoning behind it.
+## Running the project
+
+**Prerequisites:** Docker (for MongoDB), Python 3.11+, Node.js 18+.
+
+```bash
+# 1. Start MongoDB
+docker-compose up -d mongo
+
+# 2. Seed ~5 000 records
+cd seed && pip install -r requirements.txt && python seed.py
+
+# 3. Backend (port 8000)
+cd backend && pip install -r requirements.txt -r requirements-dev.txt
+uvicorn main:app --reload --port 8000
+
+# 4. Frontend (port 3000)
+cd frontend && npm install && npm run dev
+```
+
+**Tests:**
+
+```bash
+# Backend (pytest + mongomock, no real DB needed)
+cd backend && pytest
+
+# Frontend unit tests (Vitest)
+cd frontend && npx vitest run
+
+# Frontend E2E (Playwright — requires dev server on :3000)
+cd frontend && npm run test:e2e
+```
 
 ---
 
-## 1. Data loading: server pagination + full client prefetch
+## Design decisions
 
-The server supports full pagination, filtering, and sorting via query params. On page load, the client fetches page 1 immediately (using any filters already in the URL) to give a fast first paint. It then prefetches all remaining pages in the background — unfiltered, using a larger page size — to build a complete local dataset.
+- **Server pagination + full client prefetch.** The bootstrap fetch returns page 1 immediately (with any URL filters applied server-side) for a fast first paint, then all remaining pages are fetched in the background. Once complete, all filtering and sorting run entirely in the browser — at ~5 k records this gives instant filter response without overcomplicating the server.
 
-Once prefetch is complete, all filtering and sorting happen entirely in the browser with no further server requests per keystroke or filter change. This is an intentional trade-off: at thousands of records (not millions), a full client-side dataset is acceptable and makes the filtering experience feel instant.
+- **`rawData` / `viewData` split.** `rawData` is the unfiltered server dataset (source of truth); `viewData` is derived by applying current filters and sort. Mutations update `rawData` directly and `viewData` follows automatically.
 
-During prefetch, filters and sort remain interactive — changes trigger server requests (same paginated API) rather than disabling the UI. Once prefetch completes, the client silently switches to local filtering.
+- **`field_config` collection.** A single MongoDB collection owns all known fields (system + custom), returned from the API split into two properties that map directly to the two-section layout in the column picker and chip search dropdown. Custom keys are registered automatically when users save new attributes.
 
----
+- **Delta re-fetch, not SSE.** The client polls `GET /deployments?updated_since=<ts>` every 15 s (configurable via env var), returning only recently changed records. A full re-fetch runs every 5 minutes to catch records that expired past the 30-day hard-delete window.
 
-## 2. Client state: rawData + viewData
+- **Optimistic inline edits, non-optimistic detail panel save.** Inline edits (name/description) update the UI immediately and flash red + revert on error — simple to recover from. The detail panel waits for server confirmation before updating state, because reverting a multi-key attributes change is more complex.
 
-The frontend maintains two layers of state:
+- **`PATCH` for inline edits, `PUT` for detail panel.** `PATCH` accepts dot-notation paths (`{ "attributes.name": "value" }`) and applies a granular `$set`; `PUT` replaces the entire `attributes` sub-object. Maps cleanly to REST semantics and keeps server update logic unambiguous.
 
-- **`rawData`** — the full, unfiltered dataset as it arrives from the server. Source of truth.
-- **`viewData`** — derived from `rawData` by applying the current search chips, enum filters, sort, and delete-toggle. Recomputed whenever `rawData` or any filter/sort state changes.
+- **Query-time 30-day expiry.** Soft-deleted records are excluded at query time (`deleted_at < now − 720 h`) rather than via a background cleanup job — simpler, always accurate, and covered by a `deleted_at` index.
 
-Mutations (inline edits, deletes, restores) update `rawData` directly; `viewData` follows automatically.
+- **Last-write-wins.** No conflict detection or locking. The 15-second staleness window keeps the collision window small; occasional overwrites are an accepted trade-off for an internal tool at this scale.
 
----
-
-## 3. Field config collection
-
-A `field_config` MongoDB collection is the single source of truth for all known fields — both system fields (fixed schema) and custom attribute keys (user-defined). The API returns them split into two properties (`system` / `custom`) which directly mirrors the two-section layout in the column picker and chip search dropdown.
-
-System fields are seeded at startup. Custom fields are registered automatically when a user saves a new attribute key in the detail panel. The seed script pre-populates `field_config` with all custom keys found in existing documents.
-
----
-
-## 4. Staleness: delta re-fetch, not SSE
-
-Rather than WebSockets or SSE (explicitly out of scope), the client polls for changes using a **delta re-fetch** every 15 seconds: `GET /deployments?updated_since=<lastFetchedAt>`. The server returns only records modified since that timestamp — typically very few in a 15-second window. Every write operation (edit, delete, restore) bumps `updated_at` to ensure it is captured.
-
-A full re-fetch runs every 5 minutes to catch edge cases (e.g. records that expired past the 30-day hard-delete window and silently disappeared from the API).
-
-Background re-fetches never interrupt in-progress inline edits. If a re-fetch arrives while a field is being edited, the incoming value for that field is discarded — the user's in-flight value wins.
-
-The staleness threshold is configurable via environment variable (default: 15 seconds).
-
----
-
-## 5. Inline editing: optimistic; detail panel save: non-optimistic
-
-**Inline editing** (name and description from the list row) uses optimistic updates: `rawData` is updated immediately and a continuous green cell highlight signals the in-flight PATCH. On error the cell flashes red and `rawData` reverts. No action is taken if the value is unchanged.
-
-**Detail panel save** is non-optimistic: the Save button shows a loading state and the UI waits for server confirmation before updating `rawData`. The panel stays open on error. This asymmetry reflects the difference in risk: a single-field revert is simple; reverting a complex multi-key attributes change is not.
-
----
-
-## 6. Two PATCH endpoints, different semantics
-
-Editing is split across two endpoints to keep semantics clear:
-
-- **`PATCH /deployments/{id}`** — granular dot-notation update used by inline editing: `{ "attributes.name": "value" }`. Server applies as `$set`, touching only the specified field.
-- **`PUT /deployments/{id}`** — full attributes replacement used by the detail panel save: `{ "attributes": { ... } }`. Server applies as `$set: { attributes: {...} }`, replacing the entire sub-object.
-
-This maps to standard REST conventions (PATCH = partial, PUT = full replacement) and avoids ambiguity in the server's update logic.
-
----
-
-## 7. Soft delete: query-time 30-day expiry
-
-Deleted records are soft-deleted via a `deleted_at` timestamp. The 30-day expiry boundary is enforced at **query time** on every API request (`deleted_at < now - 720 hours`) rather than via a background cleanup job. This keeps the implementation simple and always accurate, with no risk of an expiry window gap. The cost is a minor per-query filter — acceptable at this scale and covered by a `deleted_at` index.
-
----
-
-## 8. Concurrent edits: last-write-wins
-
-No conflict detection or locking. The last write at the field level wins. This is an explicit, deliberate decision for an internal tool at this scale. The 15-second staleness window reduces the collision window; occasional overwrites are accepted as an edge case.
-
----
-
-## 9. URL state
-
-All filter, sort, search chip, delete-toggle, and open-panel state is encoded in the URL query string so any view is bookmarkable and shareable.
-
-Filter/sort changes use `history.replaceState` to avoid cluttering browser history. Opening the detail panel uses `history.pushState` so the back button naturally closes it.
-
-Search chips are encoded as repeatable `search=fieldPath:value` params, split on the first `:` to allow colons in values.
+- **URL-encoded state.** All filter, search chip, sort, delete-toggle, and open-panel state lives in the query string for bookmarkability. Filter/sort changes use `replaceState`; opening the detail panel uses `pushState` so the back button closes it naturally.
