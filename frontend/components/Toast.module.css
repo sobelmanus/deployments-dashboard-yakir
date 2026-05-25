@@ -1,0 +1,56 @@
+.toast {
+  position: fixed;
+  top: 16px;
+  right: 24px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  max-width: 480px;
+
+  color: #b91c1c;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+}
+
+:global(.dark) .toast {
+  color: #f87171;
+  background: rgba(127, 29, 29, 0.2);
+  border-color: #1e3a5f;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.message {
+  flex: 1;
+}
+
+.retry {
+  text-decoration: underline;
+  font-weight: 500;
+  white-space: nowrap;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+}
+
+.retry:hover { color: #7f1d1d; }
+:global(.dark) .retry:hover { color: #fca5a5; }
+
+.close {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #f87171;
+  flex-shrink: 0;
+}
+
+.close:hover { color: #b91c1c; }
+:global(.dark) .close:hover { color: #fca5a5; }

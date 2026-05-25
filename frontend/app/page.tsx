@@ -9,6 +9,7 @@ import DeploymentsTable from '@/components/table/DeploymentsTable';
 import DetailPanel from '@/components/detail-panel/DetailPanel';
 import ThemeToggle from '@/components/ThemeToggle';
 import Spinner from '@/components/Spinner';
+import Toast from '@/components/Toast';
 import type { Deployment, FilterState } from '@/types';
 import styles from './page.module.css';
 
@@ -22,6 +23,7 @@ export default function Home() {
     pendingRequests,
     lastFetchedAt,
     fetchError,
+    toastMessage,
     filterState,
     openPanelId,
     setRawData,
@@ -30,6 +32,7 @@ export default function Home() {
     setPrefetchComplete,
     setLastFetchedAt,
     setFetchError,
+    setToastMessage,
     setFilterState,
     setOpenPanelId,
     incrementPending,
@@ -188,8 +191,9 @@ export default function Home() {
 
   const handleRetry = useCallback(() => {
     setFetchError(null);
+    setToastMessage(null);
     runFullPrefetch();
-  }, [setFetchError, runFullPrefetch]);
+  }, [setFetchError, setToastMessage, runFullPrefetch]);
 
   return (
     <div className={styles.root}>
@@ -205,25 +209,6 @@ export default function Home() {
         <ToolbarProvider>
         <Toolbar />
 
-        {fetchError && (
-          <div className={styles.errorBanner}>
-            <span className={styles.errorText}>Error: {fetchError}</span>
-            <button
-              onClick={handleRetry}
-              className={styles.errorRetry}
-            >
-              Retry
-            </button>
-            <button
-              onClick={() => setFetchError(null)}
-              className={styles.errorDismiss}
-              aria-label="Dismiss error"
-            >
-              ×
-            </button>
-          </div>
-        )}
-
         <div className={styles.tableWrapper}>
           <DeploymentsTable loading={rawData.length === 0 && !fetchError} />
         </div>
@@ -234,6 +219,14 @@ export default function Home() {
         <DetailPanel
           deploymentId={openPanelId}
           onClose={handleClosePanel}
+        />
+      )}
+
+      {toastMessage && (
+        <Toast
+          message={toastMessage}
+          onClose={() => setToastMessage(null)}
+          onRetry={fetchError ? handleRetry : undefined}
         />
       )}
     </div>

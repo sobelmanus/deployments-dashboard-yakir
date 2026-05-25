@@ -56,6 +56,7 @@ beforeEach(() => {
       prefetchComplete: false,
       lastFetchedAt: null,
       fetchError: null,
+      toastMessage: null,
       filterState: { ...DEFAULT_FILTER_STATE },
       viewData: [dep],
       openPanelId: null,

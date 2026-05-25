@@ -5,12 +5,18 @@
   min-height: 24px;
 }
 
+@keyframes inline-edit-flash-error {
+  0%, 100% { background-color: transparent; }
+  40%, 60% { background-color: var(--flash-error-bg, #fca5a5); }
+}
+
 .error {
-  background: #fee2e2;
+  --flash-error-bg: #fca5a5;
+  animation: inline-edit-flash-error 0.4s ease-in-out 2;
 }
 
 :global(.dark) .error {
-  background: rgba(127, 29, 29, 0.4);
+  --flash-error-bg: rgba(220, 60, 60, 0.55);
 }
 
 .viewCell {

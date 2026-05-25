@@ -81,7 +81,7 @@ export default function InlineEditCell({
       // Revert
       updateRecord(deployment);
       setStatus('error');
-      setTimeout(() => setStatus('idle'), 1200);
+      setTimeout(() => setStatus('idle'), 850);
     } finally {
       decrementPending();
     }
@@ -140,7 +140,6 @@ export default function InlineEditCell({
   const cellClass = clsx(
     styles.cell,
     isError && styles.error,
-    isError && 'animate-pulse',
   );
 
   if (editing) {

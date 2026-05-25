@@ -36,63 +36,6 @@
   gap: 10px;
 }
 
-.errorBanner {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 14px;
-  color: #b91c1c;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: 6px;
-  padding: 8px 12px;
-}
-
-:global(.dark) .errorBanner {
-  color: #f87171;
-  background: rgba(127, 29, 29, 0.2);
-  border-color: #1e3a5f;
-}
-
-.errorText {
-  flex: 1;
-}
-
-.errorRetry {
-  text-decoration: underline;
-  font-weight: 500;
-  white-space: nowrap;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: inherit;
-}
-
-.errorRetry:hover {
-  color: #7f1d1d;
-}
-
-:global(.dark) .errorRetry:hover {
-  color: #fca5a5;
-}
-
-.errorDismiss {
-  font-weight: 500;
-  line-height: 1;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #f87171;
-}
-
-.errorDismiss:hover {
-  color: #b91c1c;
-}
-
-:global(.dark) .errorDismiss:hover {
-  color: #fca5a5;
-}
-
 .tableWrapper {
   flex: 1;
   min-height: 0;

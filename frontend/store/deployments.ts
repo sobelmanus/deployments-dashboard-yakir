@@ -8,6 +8,7 @@ export interface StoreState {
   prefetchComplete: boolean;
   lastFetchedAt: string | null;
   fetchError: string | null;
+  toastMessage: string | null;
   filterState: FilterState;
   viewData: Deployment[];
   openPanelId: string | null;
@@ -23,6 +24,7 @@ export interface StoreState {
   setPrefetchComplete: (v: boolean) => void;
   setLastFetchedAt: (ts: string) => void;
   setFetchError: (err: string | null) => void;
+  setToastMessage: (msg: string | null) => void;
   setFilterState: (fs: FilterState) => void;
   setOpenPanelId: (id: string | null) => void;
   registerEdit: (key: string) => void;
@@ -56,6 +58,7 @@ export const useDeploymentsStore = create<StoreState>((set, get) => ({
   prefetchComplete: false,
   lastFetchedAt: null,
   fetchError: null,
+  toastMessage: null,
   filterState: DEFAULT_FILTER_STATE,
   viewData: [],
   openPanelId: null,
@@ -120,7 +123,8 @@ export const useDeploymentsStore = create<StoreState>((set, get) => ({
   setFieldConfig: (fc) => set({ fieldConfig: fc }),
   setPrefetchComplete: (v) => set({ prefetchComplete: v }),
   setLastFetchedAt: (ts) => set({ lastFetchedAt: ts }),
-  setFetchError: (err) => set({ fetchError: err }),
+  setFetchError: (err) => set({ fetchError: err, toastMessage: err }),
+  setToastMessage: (msg) => set({ toastMessage: msg }),
 
   setFilterState: (fs) =>
     set((state) => ({
