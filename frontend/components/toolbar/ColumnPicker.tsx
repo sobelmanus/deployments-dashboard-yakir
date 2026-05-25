@@ -129,34 +129,22 @@ export default function ColumnPicker({ columns, onChange }: ColumnPickerProps) {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  const systemCols = columns.filter((c) => c.section === 'system');
-  const customCols = columns.filter((c) => c.section === 'custom');
-
   const toggleVisible = (path: string) => {
     onChange(columns.map((c) => (c.path === path ? { ...c, visible: !c.visible } : c)));
   };
 
-  const handleDragEnd = (event: DragEndEvent, section: 'system' | 'custom') => {
+  const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-
-    const sectionCols = section === 'system' ? systemCols : customCols;
-    const otherCols = section === 'system' ? customCols : systemCols;
-
-    const oldIdx = sectionCols.findIndex((c) => c.path === active.id);
-    const newIdx = sectionCols.findIndex((c) => c.path === over.id);
+    const oldIdx = columns.findIndex((c) => c.path === active.id);
+    const newIdx = columns.findIndex((c) => c.path === over.id);
     if (oldIdx === -1 || newIdx === -1) return;
-
-    const reordered = arrayMove(sectionCols, oldIdx, newIdx);
-    const next =
-      section === 'system' ? [...reordered, ...otherCols] : [...otherCols, ...reordered];
-    onChange(next);
+    onChange(arrayMove(columns, oldIdx, newIdx));
   };
 
   const resetToDefaults = () => {
-    const fieldConfig = columns.filter((c) => c.section === 'custom').map((c) => c.path);
-    const defaults = buildDefaults(fieldConfig);
-    onChange(defaults);
+    const customPaths = columns.filter((c) => c.section === 'custom').map((c) => c.path);
+    onChange(buildDefaults(customPaths));
   };
 
   return (
@@ -170,22 +158,13 @@ export default function ColumnPicker({ columns, onChange }: ColumnPickerProps) {
       {open && (
         <div className={styles.dropdown}>
           <div className={styles.scrollableSections}>
-            <Section
-              title="System Columns"
-              cols={systemCols}
-              onToggle={toggleVisible}
-              onDragEnd={(e) => handleDragEnd(e, 'system')}
-              sensors={sensors}
-            />
-            {customCols.length > 0 && (
-              <Section
-                title="Custom Columns"
-                cols={customCols}
-                onToggle={toggleVisible}
-                onDragEnd={(e) => handleDragEnd(e, 'custom')}
-                sensors={sensors}
-              />
-            )}
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+              <SortableContext items={columns.map((c) => c.path)} strategy={verticalListSortingStrategy}>
+                {columns.map((col) => (
+                  <SortableColumnRow key={col.path} col={col} onToggle={toggleVisible} />
+                ))}
+              </SortableContext>
+            </DndContext>
           </div>
           <div className={styles.footerRow}>
             <button
@@ -197,31 +176,6 @@ export default function ColumnPicker({ columns, onChange }: ColumnPickerProps) {
           </div>
         </div>
       )}
-    </div>
-  );
-}
-
-interface SectionProps {
-  title: string;
-  cols: ColumnConfig[];
-  onToggle: (path: string) => void;
-  onDragEnd: (e: DragEndEvent) => void;
-  sensors: ReturnType<typeof useSensors>;
-}
-
-function Section({ title, cols, onToggle, onDragEnd, sensors }: SectionProps) {
-  return (
-    <div className={styles.section}>
-      <div className={styles.sectionTitle}>
-        {title}
-      </div>
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
-        <SortableContext items={cols.map((c) => c.path)} strategy={verticalListSortingStrategy}>
-          {cols.map((col) => (
-            <SortableColumnRow key={col.path} col={col} onToggle={onToggle} />
-          ))}
-        </SortableContext>
-      </DndContext>
     </div>
   );
 }
@@ -264,6 +218,7 @@ function SortableColumnRow({
           className={styles.checkbox}
         />
         {col.label}
+        {col.section === 'system' && <span className={styles.systemIcon}>⚙</span>}
       </label>
     </div>
   );
