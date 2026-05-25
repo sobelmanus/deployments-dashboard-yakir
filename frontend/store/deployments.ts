@@ -122,9 +122,14 @@ export const useDeploymentsStore = create<StoreState>((set, get) => ({
         return d;
       });
       if (!found) newRaw.push(updated);
+      const newServerPageItems = state.serverPageItems
+        ? state.serverPageItems.map((d) =>
+            d.deployment_id === updated.deployment_id ? updated : d)
+        : null;
       return {
         rawData: newRaw,
         viewData: deriveViewData(newRaw, state.filterState),
+        serverPageItems: newServerPageItems,
       };
     }),
 

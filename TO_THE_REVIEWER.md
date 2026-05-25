@@ -36,7 +36,7 @@ cd frontend && npm run test:e2e
 
 ## Design decisions
 
-- **Server pagination + full client prefetch.** The bootstrap fetch returns page 1 immediately (with any URL filters applied server-side) for a fast first paint, then all remaining pages are fetched in the background. Once complete, all filtering and sorting run entirely in the browser — at ~5 k records this gives instant filter response without overcomplicating the server.
+- **Server pagination + full client prefetch.** The bootstrap fetch returns page 1 immediately (with URL filters applied server-side) for a fast first paint. While the full prefetch runs in the background, the table stays in **server-paginated mode** — page navigation, filter changes, and sort changes all fire backend requests so the user always sees correct data and can navigate freely. Edits made during this window are reflected immediately in the server-page view. Once all pages are in memory, filtering, sorting, and pagination switch entirely to client-side for instant response — at ~5 k records this gives instant filter response without overcomplicating the server.
 
 - **`rawData` / `viewData` split.** `rawData` is the unfiltered server dataset (source of truth); `viewData` is derived by applying current filters and sort. Mutations update `rawData` directly and `viewData` follows automatically.
 
