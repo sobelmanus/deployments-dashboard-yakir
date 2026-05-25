@@ -5,16 +5,8 @@
   min-height: 24px;
 }
 
-.saving {
-  background: #dcfce7;
-}
-
 .error {
   background: #fee2e2;
-}
-
-:global(.dark) .saving {
-  background: rgba(20, 83, 45, 0.4);
 }
 
 :global(.dark) .error {

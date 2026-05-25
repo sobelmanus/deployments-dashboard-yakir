@@ -13,6 +13,8 @@ export interface StoreState {
   openPanelId: string | null;
   // track which fields are actively being edited to guard re-fetch
   activeEdits: Set<string>; // `${deployment_id}:${fieldPath}`
+  // count of in-flight requests (prefetch pages + PATCH calls); drives the header spinner
+  pendingRequests: number;
 
   setRawData: (data: Deployment[]) => void;
   mergeRawData: (updates: Deployment[]) => void;
@@ -26,6 +28,8 @@ export interface StoreState {
   registerEdit: (key: string) => void;
   unregisterEdit: (key: string) => void;
   isFieldBeingEdited: (deploymentId: string, fieldPath: string) => boolean;
+  incrementPending: () => void;
+  decrementPending: () => void;
 }
 
 const DEFAULT_FILTER_STATE: FilterState = {
@@ -56,6 +60,7 @@ export const useDeploymentsStore = create<StoreState>((set, get) => ({
   viewData: [],
   openPanelId: null,
   activeEdits: new Set(),
+  pendingRequests: 0,
 
   setRawData: (data) =>
     set((state) => ({
@@ -142,4 +147,7 @@ export const useDeploymentsStore = create<StoreState>((set, get) => ({
   isFieldBeingEdited: (deploymentId, fieldPath) => {
     return get().activeEdits.has(`${deploymentId}:${fieldPath}`);
   },
+
+  incrementPending: () => set((state) => ({ pendingRequests: state.pendingRequests + 1 })),
+  decrementPending: () => set((state) => ({ pendingRequests: Math.max(0, state.pendingRequests - 1) })),
 }));

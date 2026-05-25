@@ -60,6 +60,7 @@ beforeEach(() => {
       viewData: [dep],
       openPanelId: null,
       activeEdits: new Set(),
+      pendingRequests: 0,
     }
   );
 });

@@ -18,14 +18,14 @@ export default function InlineEditCell({
   fieldPath,
   onTabNext,
 }: InlineEditCellProps) {
-  const { updateRecord, registerEdit, unregisterEdit } = useDeploymentsStore();
+  const { updateRecord, registerEdit, unregisterEdit, incrementPending, decrementPending } = useDeploymentsStore();
 
   const attrKey = fieldPath.slice('attributes.'.length);
   const currentValue = deployment.attributes[attrKey] ?? '';
 
   const [editing, setEditing] = useState(false);
   const [inputValue, setInputValue] = useState(currentValue);
-  const [status, setStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
+  const [status, setStatus] = useState<'idle' | 'saving' | 'error'>('idle');
   const inputRef = useRef<HTMLInputElement>(null);
   const originalValueRef = useRef(currentValue);
   // Use ref for the commit function to avoid stale-closure issues with blur
@@ -69,19 +69,21 @@ export default function InlineEditCell({
     };
     updateRecord(optimistic);
     setStatus('saving');
+    incrementPending();
 
     try {
       const updated = await patchDeployment(deployment.deployment_id, {
         [fieldPath]: trimmed,
       });
       updateRecord(updated);
-      setStatus('success');
-      setTimeout(() => setStatus('idle'), 800);
+      setStatus('idle');
     } catch {
       // Revert
       updateRecord(deployment);
       setStatus('error');
       setTimeout(() => setStatus('idle'), 1200);
+    } finally {
+      decrementPending();
     }
   }, [
     editing,
@@ -91,6 +93,8 @@ export default function InlineEditCell({
     attrKey,
     updateRecord,
     unregisterEdit,
+    incrementPending,
+    decrementPending,
   ]);
 
   // Keep commitRef in sync
@@ -131,12 +135,10 @@ export default function InlineEditCell({
     commitRef.current?.();
   };
 
-  const isSavingOrSuccess = status === 'saving' || status === 'success';
   const isError = status === 'error';
 
   const cellClass = clsx(
     styles.cell,
-    isSavingOrSuccess && styles.saving,
     isError && styles.error,
     isError && 'animate-pulse',
   );

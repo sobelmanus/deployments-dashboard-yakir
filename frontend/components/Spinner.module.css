@@ -1,0 +1,17 @@
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--color-border);
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: spinner-rotate 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+:global(.dark) .spinner {
+  border-top-color: #60a5fa;
+}
+
+@keyframes spinner-rotate {
+  to { transform: rotate(360deg); }
+}

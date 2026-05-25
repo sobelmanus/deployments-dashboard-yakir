@@ -8,6 +8,7 @@ import Toolbar, { ToolbarProvider } from '@/components/toolbar/Toolbar';
 import DeploymentsTable from '@/components/table/DeploymentsTable';
 import DetailPanel from '@/components/detail-panel/DetailPanel';
 import ThemeToggle from '@/components/ThemeToggle';
+import Spinner from '@/components/Spinner';
 import type { Deployment, FilterState } from '@/types';
 import styles from './page.module.css';
 
@@ -18,6 +19,7 @@ export default function Home() {
   const {
     rawData,
     prefetchComplete,
+    pendingRequests,
     lastFetchedAt,
     fetchError,
     filterState,
@@ -30,6 +32,8 @@ export default function Home() {
     setFetchError,
     setFilterState,
     setOpenPanelId,
+    incrementPending,
+    decrementPending,
   } = useDeploymentsStore();
 
   const prefetchAbortRef = useRef<AbortController | null>(null);
@@ -44,6 +48,7 @@ export default function Home() {
     prefetchAbortRef.current = controller;
 
     if (!isBackground) setPrefetchComplete(false);
+    incrementPending();
     const accumulated: Deployment[] = [];
 
     try {
@@ -67,8 +72,10 @@ export default function Home() {
       if (!controller.signal.aborted) {
         setFetchError(err instanceof Error ? err.message : 'Prefetch failed');
       }
+    } finally {
+      decrementPending();
     }
-  }, [setRawData, setLastFetchedAt, setPrefetchComplete, setFetchError]);
+  }, [setRawData, setLastFetchedAt, setPrefetchComplete, setFetchError, incrementPending, decrementPending]);
 
   // Delta re-fetch
   const runDeltaFetch = useCallback(async () => {
@@ -187,19 +194,16 @@ export default function Home() {
   return (
     <div className={styles.root}>
       <header className={styles.header}>
-        <h1 className={styles.headerTitle}>Deployments Dashboard</h1>
+        <div className={styles.headerLeft}>
+          <h1 className={styles.headerTitle}>Deployments Dashboard</h1>
+          {pendingRequests > 0 && <Spinner />}
+        </div>
         <ThemeToggle />
       </header>
 
       <main className={styles.main}>
         <ToolbarProvider>
         <Toolbar />
-
-        {!prefetchComplete && (
-          <div className={styles.loadingBanner}>
-            Loading full dataset for instant filtering…
-          </div>
-        )}
 
         {fetchError && (
           <div className={styles.errorBanner}>
