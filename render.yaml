@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: deployments-backend
+    runtime: docker
+    rootDir: backend
+    envVars:
+      - key: MONGODB_URI
+        sync: false
+      - key: DB_NAME
+        value: deployments
+      - key: CORS_ORIGINS
+        fromService:
+          name: deployments-frontend
+          type: web
+          property: host
+
+  - type: web
+    name: deployments-frontend
+    runtime: node
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: BACKEND_URL
+        fromService:
+          name: deployments-backend
+          type: web
+          property: host
+      - key: NODE_ENV
+        value: production
