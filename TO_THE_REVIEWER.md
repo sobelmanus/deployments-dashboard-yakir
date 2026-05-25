@@ -53,3 +53,5 @@ cd frontend && npm run test:e2e
 - **Last-write-wins.** No conflict detection or locking. The 15-second staleness window keeps the collision window small; occasional overwrites are an accepted trade-off for an internal tool at this scale.
 
 - **URL-encoded state.** All filter, search chip, sort, delete-toggle, and open-panel state lives in the query string for bookmarkability. Filter/sort changes use `replaceState`; opening the detail panel uses `pushState` so the back button closes it naturally.
+
+- **Req 4 — in-session vs. tab-discard.** "Reloading all data every time is wasteful" is addressed by URL state persistence and `updated_since` delta polling: returning to the tab within a session costs at most one delta request rather than a full prefetch. The tab-discard case (Chrome evicting a long-backgrounded tab) is not handled — that would require persisting `rawData` to localStorage, which is risky at ~5 k records because the 5 MB quota is tight and cold-cache data would need a staleness check before it could be trusted.
