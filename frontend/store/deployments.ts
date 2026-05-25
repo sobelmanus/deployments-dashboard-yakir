@@ -6,6 +6,9 @@ export interface StoreState {
   rawData: Deployment[];
   fieldConfig: FieldConfig | null;
   prefetchComplete: boolean;
+  serverPageItems: Deployment[] | null;
+  serverPageCount: number | null;
+  serverTotal: number | null;
   lastFetchedAt: string | null;
   fetchError: string | null;
   toastMessage: string | null;
@@ -22,6 +25,8 @@ export interface StoreState {
   updateRecord: (updated: Deployment) => void;
   setFieldConfig: (fc: FieldConfig) => void;
   setPrefetchComplete: (v: boolean) => void;
+  setServerPage: (items: Deployment[], total: number, pageCount: number) => void;
+  clearServerPage: () => void;
   setLastFetchedAt: (ts: string) => void;
   setFetchError: (err: string | null) => void;
   setToastMessage: (msg: string | null) => void;
@@ -56,6 +61,9 @@ export const useDeploymentsStore = create<StoreState>((set, get) => ({
   rawData: [],
   fieldConfig: null,
   prefetchComplete: false,
+  serverPageItems: null,
+  serverPageCount: null,
+  serverTotal: null,
   lastFetchedAt: null,
   fetchError: null,
   toastMessage: null,
@@ -122,6 +130,10 @@ export const useDeploymentsStore = create<StoreState>((set, get) => ({
 
   setFieldConfig: (fc) => set({ fieldConfig: fc }),
   setPrefetchComplete: (v) => set({ prefetchComplete: v }),
+  setServerPage: (items, total, pageCount) =>
+    set({ serverPageItems: items, serverTotal: total, serverPageCount: pageCount }),
+  clearServerPage: () =>
+    set({ serverPageItems: null, serverTotal: null, serverPageCount: null }),
   setLastFetchedAt: (ts) => set({ lastFetchedAt: ts }),
   setFetchError: (err) => set({ fetchError: err, toastMessage: err }),
   setToastMessage: (msg) => set({ toastMessage: msg }),

@@ -30,6 +30,8 @@ export default function Home() {
     mergeRawData,
     setFieldConfig,
     setPrefetchComplete,
+    setServerPage,
+    clearServerPage,
     setLastFetchedAt,
     setFetchError,
     setToastMessage,
@@ -40,7 +42,39 @@ export default function Home() {
   } = useDeploymentsStore();
 
   const prefetchAbortRef = useRef<AbortController | null>(null);
+  const displayPageAbortRef = useRef<AbortController | null>(null);
   const initializedRef = useRef(false);
+
+  // Fetch a single page from the server for immediate display (used during prefetch)
+  const fetchDisplayPage = useCallback(async (pageIndex: number, pageSize: number) => {
+    if (displayPageAbortRef.current) {
+      displayPageAbortRef.current.abort();
+    }
+    const controller = new AbortController();
+    displayPageAbortRef.current = controller;
+
+    try {
+      const fs = useDeploymentsStore.getState().filterState;
+      const res = await fetchDeployments({
+        page: pageIndex + 1,
+        limit: pageSize,
+        view: fs.view,
+        status: fs.status,
+        type: fs.type,
+        environment: fs.environment,
+        chips: fs.chips,
+        sort: fs.sort,
+        order: fs.order,
+      });
+      if (!controller.signal.aborted) {
+        setServerPage(res.items, res.total, res.pages);
+      }
+    } catch (err) {
+      if (!controller.signal.aborted) {
+        setFetchError(err instanceof Error ? err.message : 'Page fetch failed');
+      }
+    }
+  }, [setServerPage, setFetchError]);
 
   // Full prefetch: fetch all pages sequentially
   const runFullPrefetch = useCallback(async (isBackground = false) => {
@@ -69,6 +103,7 @@ export default function Home() {
         setRawData(accumulated);
         setLastFetchedAt(new Date().toISOString());
         setPrefetchComplete(true);
+        clearServerPage();
         setFetchError(null);
       }
     } catch (err) {
@@ -78,7 +113,7 @@ export default function Home() {
     } finally {
       decrementPending();
     }
-  }, [setRawData, setLastFetchedAt, setPrefetchComplete, setFetchError, incrementPending, decrementPending]);
+  }, [setRawData, setLastFetchedAt, setPrefetchComplete, clearServerPage, setFetchError, incrementPending, decrementPending]);
 
   // Delta re-fetch
   const runDeltaFetch = useCallback(async () => {
@@ -118,7 +153,7 @@ export default function Home() {
       try {
         const res = await fetchDeployments({
           page: 1,
-          limit: 100,
+          limit: 50,
           view: urlFilter.view,
           status: urlFilter.status,
           type: urlFilter.type,
@@ -127,8 +162,10 @@ export default function Home() {
           sort: urlFilter.sort,
           order: urlFilter.order,
         });
-        // Set initial data
+        // Populate rawData so the loading skeleton goes away, and set the
+        // server page state so the table shows correct total/pageCount immediately.
         setRawData(res.items);
+        setServerPage(res.items, res.total, res.pages);
       } catch (err) {
         setFetchError(err instanceof Error ? err.message : 'Bootstrap fetch failed');
       }
@@ -143,6 +180,7 @@ export default function Home() {
     setOpenPanelId,
     setFieldConfig,
     setRawData,
+    setServerPage,
     setFetchError,
     runFullPrefetch,
   ]);
@@ -210,7 +248,10 @@ export default function Home() {
         <Toolbar />
 
         <div className={styles.tableWrapper}>
-          <DeploymentsTable loading={rawData.length === 0 && !fetchError} />
+          <DeploymentsTable
+            loading={rawData.length === 0 && !fetchError}
+            onPageChange={!prefetchComplete ? fetchDisplayPage : undefined}
+          />
         </div>
         </ToolbarProvider>
       </main>

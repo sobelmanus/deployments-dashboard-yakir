@@ -6,6 +6,8 @@ import {
   getCoreRowModel,
   getPaginationRowModel,
   flexRender,
+  type PaginationState,
+  type Updater,
 } from '@tanstack/react-table';
 import clsx from 'clsx';
 import { useDeploymentsStore } from '@/store/deployments';
@@ -17,21 +19,38 @@ import styles from './DeploymentsTable.module.css';
 
 interface DeploymentsTableProps {
   loading: boolean;
+  onPageChange?: (pageIndex: number, pageSize: number) => void;
 }
 
 const SKELETON_ROWS = 10;
 
-export default function DeploymentsTable({ loading }: DeploymentsTableProps) {
-  const { viewData, filterState, setFilterState, setOpenPanelId } = useDeploymentsStore();
+export default function DeploymentsTable({ loading, onPageChange }: DeploymentsTableProps) {
+  const {
+    viewData,
+    prefetchComplete,
+    serverPageItems,
+    serverPageCount,
+    serverTotal,
+    filterState,
+    setFilterState,
+    setOpenPanelId,
+  } = useDeploymentsStore();
   const { columns: colConfig } = useContext(ToolbarContext);
 
   const [deletingRowId, setDeletingRowId] = useState<string | null>(null);
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 50 });
 
-  // Reset to first page only when the user actively changes filter/sort state,
-  // not on every background delta re-fetch (which produces a new viewData reference)
+  const isServerPaginated = !prefetchComplete && serverPageItems !== null;
+  const tableData = isServerPaginated ? serverPageItems! : viewData;
+  const displayTotal = isServerPaginated ? serverTotal! : viewData.length;
+
+  // Reset to first page when filter/sort state changes and re-fetch if server-paginated
   useEffect(() => {
     setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+    if (isServerPaginated) {
+      onPageChange?.(0, pagination.pageSize);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterState]);
 
   const visibleCols = useMemo(() => colConfig.filter((c) => c.visible), [colConfig]);
@@ -53,13 +72,24 @@ export default function DeploymentsTable({ loading }: DeploymentsTableProps) {
     [visibleCols, filterState, handleSort]
   );
 
+  const handlePaginationChange = useCallback((updater: Updater<PaginationState>) => {
+    const next = typeof updater === 'function' ? updater(pagination) : updater;
+    setPagination(next);
+    if (isServerPaginated) {
+      onPageChange?.(next.pageIndex, next.pageSize);
+    }
+  }, [pagination, isServerPaginated, onPageChange]);
+
   const table = useReactTable({
-    data: viewData,
+    data: tableData,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     state: { pagination },
-    onPaginationChange: setPagination,
+    onPaginationChange: handlePaginationChange,
+    manualPagination: isServerPaginated,
+    pageCount: isServerPaginated ? (serverPageCount ?? 1) : undefined,
+    autoResetPageIndex: false,
     manualSorting: true,
     manualFiltering: true,
   });
@@ -174,10 +204,10 @@ export default function DeploymentsTable({ loading }: DeploymentsTableProps) {
       </div>
 
       <PaginationFooter
-        total={viewData.length}
+        total={displayTotal}
         pageCount={pageCount}
         pagination={pagination}
-        setPagination={setPagination}
+        setPagination={handlePaginationChange}
       />
     </div>
   );
